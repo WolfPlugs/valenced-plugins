@@ -13,7 +13,7 @@
       },
       "versions": {
         "1.0.0": {
-          "url": "https://wolfplugs.github.io/valenced-plugins/pool/wolfie.add-attachments@1.0.0.zip",
+          "url": "https://plugins.obamabot.me/valenced-plugins/pool/wolfie.add-attachments@1.0.0.zip",
           "sha256": "077a76495b439279d0d3118a541cc43426315d26cbf24892faccc60c758de453",
           "size": 2415,
           "dependencies": {
@@ -37,7 +37,7 @@
       },
       "versions": {
         "1.0.0": {
-          "url": "https://wolfplugs.github.io/valenced-plugins/pool/wolfie.bot-client@1.0.0.zip",
+          "url": "https://plugins.obamabot.me/valenced-plugins/pool/wolfie.bot-client@1.0.0.zip",
           "sha256": "0575ccb87d943487bac329406148505740aa9c6ffec99414733076bcffb90986",
           "size": 14692,
           "dependencies": {
@@ -62,7 +62,7 @@
       },
       "versions": {
         "1.0.0": {
-          "url": "https://wolfplugs.github.io/valenced-plugins/pool/wolfie.gif-text@1.0.0.zip",
+          "url": "https://plugins.obamabot.me/valenced-plugins/pool/wolfie.gif-text@1.0.0.zip",
           "sha256": "9ded8396b5d9e1338f364fb43e764a17794431d1933c4f7611b8377b1b4f4245",
           "size": 3671,
           "dependencies": {
@@ -89,7 +89,7 @@
       },
       "versions": {
         "1.0.0": {
-          "url": "https://wolfplugs.github.io/valenced-plugins/pool/wolfie.global-badges@1.0.0.zip",
+          "url": "https://plugins.obamabot.me/valenced-plugins/pool/wolfie.global-badges@1.0.0.zip",
           "sha256": "0a50db0de22ecab4fa3a7585a4c169d94297f6042c41bbdaccfdfa1cd228b0b7",
           "size": 4454,
           "dependencies": {
@@ -113,7 +113,7 @@
       },
       "versions": {
         "1.0.0": {
-          "url": "https://wolfplugs.github.io/valenced-plugins/pool/wolfie.media-utils@1.0.0.zip",
+          "url": "https://plugins.obamabot.me/valenced-plugins/pool/wolfie.media-utils@1.0.0.zip",
           "sha256": "b127763aa8b3446ea9450ef6ff3037f94703d8693cc05ef0d98374c478fc758a",
           "size": 54927,
           "dependencies": {
@@ -137,7 +137,7 @@
       },
       "versions": {
         "1.0.0": {
-          "url": "https://wolfplugs.github.io/valenced-plugins/pool/wolfie.nsfw-blur@1.0.0.zip",
+          "url": "https://plugins.obamabot.me/valenced-plugins/pool/wolfie.nsfw-blur@1.0.0.zip",
           "sha256": "db417ee51104a3ffec13b6fd00b21b0ffe1a863daeae75ab2fb969751612e12f",
           "size": 22145,
           "dependencies": {
@@ -161,7 +161,7 @@
       },
       "versions": {
         "1.0.0": {
-          "url": "https://wolfplugs.github.io/valenced-plugins/pool/wolfie.petpet@1.0.0.zip",
+          "url": "https://plugins.obamabot.me/valenced-plugins/pool/wolfie.petpet@1.0.0.zip",
           "sha256": "9f0a14e1f65c293e26394328efeb60bd7bba9cd25bb9cdb81465943bc70d3141",
           "size": 62676,
           "dependencies": {
@@ -185,7 +185,7 @@
       },
       "versions": {
         "1.0.0": {
-          "url": "https://wolfplugs.github.io/valenced-plugins/pool/wolfie.questify@1.0.0.zip",
+          "url": "https://plugins.obamabot.me/valenced-plugins/pool/wolfie.questify@1.0.0.zip",
           "sha256": "22ff4a4aedc5cf8abf2ab63285bbbc5ba332116e507cb9fbeb2f076dac32f205",
           "size": 9083,
           "dependencies": {
@@ -209,7 +209,7 @@
       },
       "versions": {
         "1.0.0": {
-          "url": "https://wolfplugs.github.io/valenced-plugins/pool/wolfie.sound-controls@1.0.0.zip",
+          "url": "https://plugins.obamabot.me/valenced-plugins/pool/wolfie.sound-controls@1.0.0.zip",
           "sha256": "7c1e5bf4c443ab580eac807f5395aa5e30d13d5fb9e98e390274d279bbdc28ea",
           "size": 2484,
           "dependencies": {
