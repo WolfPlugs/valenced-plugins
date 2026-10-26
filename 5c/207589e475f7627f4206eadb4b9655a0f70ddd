@@ -1,0 +1,71 @@
+plugins/media-utils/editor/canvas-document.generated.ts
+  s_37fe6706248398::t_8b31700d67d80f 1-4
+plugins/media-utils/editor/canvas-runtime.ts
+  s_37fe6706248398::t_7c6afb26309a9c 1-596
+plugins/media-utils/editor/index.tsx
+  s_37fe6706248398::t_69462a152d52a2 1-190
+plugins/media-utils/editor/media-file.ts
+  s_37fe6706248398::t_af44ba3629787f 1-25
+plugins/media-utils/editor/native-bridge.ts
+  s_37fe6706248398::t_c47dd939b6a56b 1-45
+plugins/media-utils/editor/overlay-sheet.tsx
+  s_37fe6706248398::t_48df7b971e2443 1-688
+plugins/media-utils/editor/timeline.tsx
+  s_37fe6706248398::t_ea6cfb3f1ba722 1-261
+plugins/media-utils/editor/trim-range.ts
+  s_37fe6706248398::t_af5852ca139eb9 1-21
+plugins/media-utils/editor/webm-duration.ts
+  s_37fe6706248398::t_c35205b2132738 1-102
+plugins/media-utils/editor/webview.ts
+  s_37fe6706248398::t_7f23a1a54f05e9 1-48
+plugins/media-utils/favorites/patches.ts
+  s_37fe6706248398::t_6883efa513d8d7 1-158
+plugins/media-utils/index.tsx
+  s_37fe6706248398::t_ed3c639c76e6e5 1-127
+plugins/media-utils/manifest.json
+  s_37fe6706248398::t_fe1a6a2ffc5ebb 1-24
+plugins/media-utils/menus/attachment-menu.tsx
+  s_37fe6706248398::t_0296509854be1f 1-117
+plugins/media-utils/menus/options-icon.tsx
+  s_37fe6706248398::t_bf569145332418 1-17
+plugins/media-utils/menus/viewer-menu.tsx
+  s_37fe6706248398::t_f4c760e45b62c2 1-80
+plugins/media-utils/search/search-icon.tsx
+  s_37fe6706248398::t_a806a56a486820 1-17
+plugins/media-utils/search/sheets.tsx
+  s_37fe6706248398::t_bd565b44518c28 1-81
+plugins/media-utils/settings/config.ts
+  s_37fe6706248398::t_2fd0c023386099 1-54
+plugins/media-utils/settings/index.tsx
+  s_37fe6706248398::t_ec9d2c97bf8dd7 1-89
+plugins/media-utils/src/main/kotlin/org/wolfies/mediautils/MediaUtils.kt
+  s_37fe6706248398::t_0601a5fc0c4df6 1-102
+plugins/media-utils/src/main/kotlin/org/wolfies/mediautils/NativeEditor.kt
+  s_37fe6706248398::t_71e3fd6fcef63b 1-230
+plugins/media-utils/utils/media.ts
+  s_37fe6706248398::t_83c122f1a5ce33 1-53
+plugins/media-utils/viewer/full-resolution.tsx
+  s_37fe6706248398::t_883f954cf642d5 1-204
+plugins/media-utils/viewer/rotation-surface.tsx
+  s_37fe6706248398::t_109f55078fabd4 1-252
+plugins/media-utils/viewer/touch-transform.ts
+  s_37fe6706248398::t_cd95c699a56424 1-85
+plugins/media-utils/viewer/zoom.ts
+  s_37fe6706248398::t_0f33d5d43c5478 1-29
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "5c207589e475f7627f4206eadb4b9655a0f70ddd",
+  "prompts": {},
+  "sessions": {
+    "s_37fe6706248398": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a17a28-2576-7422-9f92-076906a9ae0f",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Wolfkid200444 <32025746+Wolfkid200444@users.noreply.github.com>"
+    }
+  }
+}
