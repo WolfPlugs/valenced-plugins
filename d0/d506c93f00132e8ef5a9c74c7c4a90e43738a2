@@ -1,0 +1,29 @@
+plugins/petpet/attachments.ts
+  s_37fe6706248398::t_73973bf3238d7d 1-51
+plugins/petpet/command.ts
+  s_37fe6706248398::t_5ff14c536c9313 1-69
+plugins/petpet/hand-frames.ts
+  s_37fe6706248398::t_2245525329f926 1-7
+plugins/petpet/index.ts
+  s_37fe6706248398::t_7d4bc299580403 1-124
+plugins/petpet/manifest.json
+  s_37fe6706248398::t_c1281756d07848 1-20
+plugins/petpet/render.ts
+  s_37fe6706248398::t_cfda21eb9e077f 1-121
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "d0d506c93f00132e8ef5a9c74c7c4a90e43738a2",
+  "prompts": {},
+  "sessions": {
+    "s_37fe6706248398": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a17a28-2576-7422-9f92-076906a9ae0f",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Wolfkid200444 <32025746+Wolfkid200444@users.noreply.github.com>"
+    }
+  }
+}
