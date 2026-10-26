@@ -1,0 +1,24 @@
+{
+	"format": 1,
+	"id": "wolfie.media-utils",
+	"name": "MediaUtils",
+	"description": "Rotate and zoom media, search images, crop images, and trim and crop video attachments.",
+	"author": "Wolfie <347096063569559553> (https://wolfies.org/ \"Website\") (https://github.com/Wolfkid200444 \"GitHub\")",
+	"icon": "ImageIcon",
+	"version": "1.0.0",
+	"dependencies": {
+		"valenced.api": {
+			"version": ">=1 <2"
+		},
+		"discord": {
+			"version": ">=351.1"
+		}
+	},
+	"dist": {
+		"script": "index.js",
+		"android": {
+			"path": "plugin.jar",
+			"class": "org.wolfies.mediautils.MediaUtils"
+		}
+	}
+}
