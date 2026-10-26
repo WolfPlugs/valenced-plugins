@@ -1,0 +1,43 @@
+plugins/bot-client/accounts.ts
+  s_37fe6706248398::t_863f6cb4715d5a 1-37
+plugins/bot-client/api.ts
+  s_37fe6706248398::t_f6aba5242622c5 1-251
+plugins/bot-client/builder.ts
+  s_37fe6706248398::t_598be85c5a3bb5 1-629
+plugins/bot-client/composer.ts
+  s_37fe6706248398::t_5a02c3a8c715c8 1-153
+plugins/bot-client/index.ts
+  s_37fe6706248398::t_d5601291f57579 1-57
+plugins/bot-client/manifest.json
+  s_37fe6706248398::t_9b32d73b6bb1e8 1-21
+plugins/bot-client/members.ts
+  s_37fe6706248398::t_748db5a5236974 1-240
+plugins/bot-client/message.ts
+  s_37fe6706248398::t_830eefb62b3eaf 1-272
+plugins/bot-client/protocol.ts
+  s_37fe6706248398::t_0457ffc0973647 1-308
+plugins/bot-client/screen.ts
+  s_37fe6706248398::t_a41c8d4fcfa1a9 1-211
+plugins/bot-client/session.ts
+  s_37fe6706248398::t_38b26c02d6492f 1-390
+plugins/bot-client/sheet.ts
+  s_37fe6706248398::t_77c976da9cf106 1-222
+plugins/bot-client/uploads.ts
+  s_37fe6706248398::t_bdd5fa0e6d3499 1-63
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "4b835647f10aba94283b646ebe723f7210673870",
+  "prompts": {},
+  "sessions": {
+    "s_37fe6706248398": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a17a28-2576-7422-9f92-076906a9ae0f",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Wolfkid200444 <32025746+Wolfkid200444@users.noreply.github.com>"
+    }
+  }
+}
