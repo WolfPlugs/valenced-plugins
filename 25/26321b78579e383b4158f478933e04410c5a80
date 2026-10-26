@@ -1,0 +1,99 @@
+.github/scripts/checkout-pool.sh
+  s_37fe6706248398::t_d4ffe63a822fa2 1-26
+.github/scripts/lib.sh
+  s_37fe6706248398::t_58e2b8aee1d0c7 1-35
+.github/scripts/plan-releases.sh
+  s_37fe6706248398::t_4d51519ff6bfd8 1-10
+.github/scripts/publish-pool.sh
+  s_37fe6706248398::t_88c3d2ec79a964 1-49
+.github/scripts/regenerate-index.sh
+  s_37fe6706248398::t_bdd3c7dc0e6d34 1-19
+.github/scripts/setup-native.sh
+  s_37fe6706248398::t_a0e335df2e0241 1-31
+.github/scripts/tag-releases.sh
+  s_37fe6706248398::t_acc566b0e0baa6 1-21
+.github/workflows/deploy-pages.yml
+  s_37fe6706248398::t_4c63c5dd1e6947 1-30
+.github/workflows/publish-index.yml
+  s_37fe6706248398::t_5e6650cd9beb83 1-41
+.github/workflows/release.yml
+  s_37fe6706248398::t_6b8b35f19a6407 1-71
+.github/workflows/validate.yml
+  s_37fe6706248398::t_50445edc6a1b75 1-30
+.gitignore
+  s_37fe6706248398::t_53036f89d0d0aa 1-18
+.vscode/settings.json
+  s_37fe6706248398::t_d49409879b05b5 1-8
+LICENSE
+  s_37fe6706248398::t_9ee0aaeee8b9ed 1-621
+README.md
+  s_37fe6706248398::t_f8080393f2e606 1-80
+biome.json
+  s_37fe6706248398::t_350ed2e28c931e 1-123
+bun.lock
+  s_37fe6706248398::t_1b057261403fd3 1-789
+package.json
+  s_37fe6706248398::t_d3c31577e05181 1-47
+repo.config.json
+  s_37fe6706248398::t_33e7f48d02a86b 1-5
+scripts/add-attachments.test.ts
+  s_37fe6706248398::t_a97a0df6c12a6d 1-297
+scripts/bot-client-accounts.test.ts
+  s_37fe6706248398::t_088c76a1acab7b 1-82
+scripts/bot-client-api.test.ts
+  s_37fe6706248398::t_446dc121c7a30d 1-206
+scripts/bot-client-members.test.ts
+  s_37fe6706248398::t_c9d7a38c364ebb 1-90
+scripts/bot-client-message.test.ts
+  s_37fe6706248398::t_4325f85fde3c00 1-126
+scripts/bot-client-protocol.test.ts
+  s_37fe6706248398::t_841d0b789199e9 1-214
+scripts/bot-client-smoke.ts
+  s_37fe6706248398::t_74f4f8c0df291d 1-664
+scripts/bot-client-uploads.test.ts
+  s_37fe6706248398::t_13d784852c251c 1-32
+scripts/build-media-utils-canvas.ts
+  s_37fe6706248398::t_874a10da5175be 1-11
+scripts/build-media-utils-native.mjs
+  s_37fe6706248398::t_e8bcb0ba1806a9 1-50
+scripts/build-nsfw-native.mjs
+  s_37fe6706248398::t_8a7430e41ad24d 1-59
+scripts/check-petpet-bundle.mjs
+  s_37fe6706248398::t_8295fe77e154d1 1-128
+scripts/media-utils-document.test.ts
+  s_37fe6706248398::t_6c3b654a089989 1-13
+scripts/media-utils-editor.test.ts
+  s_37fe6706248398::t_6e1ae019ec1469 1-208
+scripts/media-utils-files.test.ts
+  s_37fe6706248398::t_4e8924f477afa5 1-44
+scripts/media-utils-trim.test.ts
+  s_37fe6706248398::t_1572c6a8face46 1-16
+scripts/media-utils-webm.test.ts
+  s_37fe6706248398::t_e359de4f17d9a0 1-19
+scripts/package.mjs
+  s_37fe6706248398::t_04c7c4a7e1ca27 1-45
+scripts/petpet.test.ts
+  s_37fe6706248398::t_f882a52bf2d737 1-40
+tsconfig.json
+  s_37fe6706248398::t_fc813ee522f814 1-15
+types/assets.d.ts
+  s_37fe6706248398::t_46308de630ca28 1-24
+types/petpet-codecs.d.ts
+  s_37fe6706248398::t_5138b34f86d1bb 1-29
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "2526321b78579e383b4158f478933e04410c5a80",
+  "prompts": {},
+  "sessions": {
+    "s_37fe6706248398": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a17a28-2576-7422-9f92-076906a9ae0f",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Wolfkid200444 <32025746+Wolfkid200444@users.noreply.github.com>"
+    }
+  }
+}
