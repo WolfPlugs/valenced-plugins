@@ -1,0 +1,21 @@
+.github/workflows/validate.yml
+  s_37fe6706248398::t_a2a914b056c9fa 30
+README.md
+  s_37fe6706248398::t_69f281eb221127 12
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "f06a769476d5901bb22c0dfea9b41d179a0d706f",
+  "prompts": {},
+  "sessions": {
+    "s_37fe6706248398": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a17a28-2576-7422-9f92-076906a9ae0f",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Wolfkid200444 <32025746+Wolfkid200444@users.noreply.github.com>"
+    }
+  }
+}
