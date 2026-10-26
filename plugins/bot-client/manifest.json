@@ -1,0 +1,21 @@
+{
+	"format": 1,
+	"id": "wolfie.bot-client",
+	"name": "Bot Client",
+	"description": "Recommended to use a different client for this",
+	"author": "Wolfie <347096063569559553> (https://wolfies.org/ \"Website\") (https://github.com/Wolfkid200444 \"GitHub\")",
+	"icon": "BotIcon",
+	"version": "1.0.0",
+	"dependencies": {
+		"valenced.api": {
+			"version": ">=1 <2"
+		},
+		"discord": {
+			"version": "*"
+		},
+		"valenced.settings": {}
+	},
+	"dist": {
+		"script": "index.js"
+	}
+}
