@@ -1,0 +1,30 @@
+name: Validate
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up native plugin compiler
+        run: bash .github/scripts/setup-native.sh
+
+      - run: bun install --frozen-lockfile
+      - run: bun run test
+      - run: bun run lint:types
+      - run: bunx biome check plugins scripts
+      - run: shellcheck --shell=bash .github/scripts/*.sh
+      - run: bun run package
+      - run: bun run generate-index --dist build/dist --base-url https://wolfplugs.github.io/valenced-plugins --out /tmp/index.json

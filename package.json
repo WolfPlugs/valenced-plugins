@@ -1,0 +1,47 @@
+{
+	"name": "@wolfplugs/valenced-plugins",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"build": "bun scripts/build-media-utils-canvas.ts && valenced-plugin build",
+		"build:dev": "bun scripts/build-media-utils-canvas.ts && valenced-plugin build --dev",
+		"generate-index": "valenced-plugin generate-index",
+		"plan-releases": "valenced-plugin plan-releases",
+		"serve": "valenced-plugin serve",
+		"lint": "biome check",
+		"lint:types": "tsc --noEmit",
+		"package": "bun run build && bun scripts/package.mjs",
+		"test": "for file in scripts/*.test.ts; do bun test \"$file\" || exit; done"
+	},
+	"dependencies": {
+		"@pdf-lib/upng": "^1.0.1",
+		"@valenced/plugin-cli": "git+https://github.com/Valenced/valenced-plugin-cli.git",
+		"@valenced/types": "git+https://github.com/Valenced/valenced-types.git",
+		"fflate": "^0.8.3",
+		"gifenc": "^1.0.3"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^2.5.12",
+		"@types/node": "^26.4.1",
+		"@types/react": "^19.2.18",
+		"react-native": "0.81.6",
+		"typescript": "^7.0.2",
+		"@react-native-community/netinfo": "^12.0.1"
+	},
+	"overrides": {
+		"@react-native/community-cli-plugin": "npm:dry-uninstall",
+		"@react-native/codegen": "npm:dry-uninstall",
+		"babel-jest": "npm:dry-uninstall",
+		"babel-plugin-syntax-hermes-parser": "npm:dry-uninstall",
+		"hermes-compiler": "npm:dry-uninstall",
+		"jsc-android": "npm:dry-uninstall",
+		"react-devtools-core": "npm:dry-uninstall",
+		"recyclerlistview": "npm:dry-uninstall",
+		"react-native-gesture-handler": "npm:dry-uninstall",
+		"react-native-screens": "npm:dry-uninstall"
+	},
+	"trustedDependencies": [
+		"@valenced/plugin-cli",
+		"@swc/core"
+	]
+}

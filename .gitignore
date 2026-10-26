@@ -1,0 +1,18 @@
+# Gradle / Android
+.gradle/
+build/
+plugins/*/build/
+local.properties
+.kotlin/
+
+# JS
+node_modules/
+
+# Misc
+.DS_Store
+.idea/
+*.iml
+
+# Local analysis and agent instructions
+graphify-out/
+AGENTS.md
