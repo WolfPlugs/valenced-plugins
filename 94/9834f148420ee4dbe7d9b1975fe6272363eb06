@@ -1,0 +1,53 @@
+plugins/questify/completion/controller.ts
+  s_37fe6706248398::t_36a12397a3c41e 1-311
+plugins/questify/completion/lifecycle.ts
+  s_37fe6706248398::t_9c3a236c61955b 1-166
+plugins/questify/completion/requests.ts
+  s_37fe6706248398::t_84b66ebc9696bc 1-70
+plugins/questify/completion/service.ts
+  s_37fe6706248398::t_edaa3024a9e7e1 1-109
+plugins/questify/completion/state.ts
+  s_37fe6706248398::t_e11dca2344d021 1-31
+plugins/questify/index.ts
+  s_37fe6706248398::t_7804ef82cffd2e 1-72
+plugins/questify/manifest.json
+  s_37fe6706248398::t_b6060f2639b176 1-20
+plugins/questify/patches/components.ts
+  s_37fe6706248398::t_917654f60b2ab6 1-14
+plugins/questify/patches/lists.ts
+  s_37fe6706248398::t_c381d8efd09de9 1-42
+plugins/questify/patches/menus.tsx
+  s_37fe6706248398::t_5a67f4cc338786 1-152
+plugins/questify/patches/video-focus.ts
+  s_37fe6706248398::t_b9ef972d746a4e 1-40
+plugins/questify/quests/filtering.ts
+  s_37fe6706248398::t_179cc555264f70 1-54
+plugins/questify/quests/model.ts
+  s_37fe6706248398::t_c429d07655eb9e 1-111
+plugins/questify/quests/store.ts
+  s_37fe6706248398::t_a758b3038449ac 1-47
+plugins/questify/settings/config.ts
+  s_37fe6706248398::t_bafdde83cabd52 1-46
+plugins/questify/settings/index.tsx
+  s_37fe6706248398::t_d404787771388b 1-302
+plugins/questify/settings/warning-policy.ts
+  s_37fe6706248398::t_5dae8a8a9e1c26 1-38
+plugins/questify/settings/warnings.tsx
+  s_37fe6706248398::t_82141634ef02fd 1-177
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "949834f148420ee4dbe7d9b1975fe6272363eb06",
+  "prompts": {},
+  "sessions": {
+    "s_37fe6706248398": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a17a28-2576-7422-9f92-076906a9ae0f",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Wolfkid200444 <32025746+Wolfkid200444@users.noreply.github.com>"
+    }
+  }
+}
