@@ -1,0 +1,20 @@
+{
+	"format": 1,
+	"id": "wolfie.sound-controls",
+	"name": "Sound Controls",
+	"description": "Mute individual call effects, ringtones, and in-app notification sounds.",
+	"author": "Wolfie <347096063569559553> (https://wolfies.org/ \"Website\") (https://github.com/Wolfkid200444 \"GitHub\")",
+	"icon": "SoundboardSlashIcon",
+	"version": "1.0.0",
+	"dependencies": {
+		"valenced.api": {
+			"version": ">=1 <2"
+		},
+		"discord": {
+			"version": "*"
+		}
+	},
+	"dist": {
+		"script": "index.js"
+	}
+}
