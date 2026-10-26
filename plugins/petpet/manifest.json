@@ -1,0 +1,20 @@
+{
+	"format": 1,
+	"id": "wolfie.petpet",
+	"name": "PetPet",
+	"description": "Generate PetPet GIFs locally with /petpet user and attach them to your message draft.",
+	"author": "Wolfie <347096063569559553> (https://wolfies.org/ \"Website\") (https://github.com/Wolfkid200444 \"GitHub\")",
+	"icon": "GifIcon",
+	"version": "1.0.0",
+	"dependencies": {
+		"valenced.api": {
+			"version": ">=1 <2"
+		},
+		"discord": {
+			"version": "*"
+		}
+	},
+	"dist": {
+		"script": "index.js"
+	}
+}
