@@ -1,0 +1,31 @@
+plugins/gif-text/attachments.ts
+  s_37fe6706248398::t_578309a66deb16 1-174
+plugins/gif-text/config.ts
+  s_37fe6706248398::t_a3a4cbf6157f08 1-2
+plugins/gif-text/index.ts
+  s_37fe6706248398::t_c2c0761d380946 1-142
+plugins/gif-text/manifest.json
+  s_37fe6706248398::t_f4ab18c6b92250 1-20
+plugins/gif-text/media-format.ts
+  s_37fe6706248398::t_ed49b842480115 1-55
+plugins/gif-text/media-urls.ts
+  s_37fe6706248398::t_0b85ba8ceded2e 1-42
+plugins/gif-text/settings.tsx
+  s_37fe6706248398::t_9667b395b15a19 1-29
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "2bf3483ca9199adce61444560f0f4fccb08e55ce",
+  "prompts": {},
+  "sessions": {
+    "s_37fe6706248398": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a17a28-2576-7422-9f92-076906a9ae0f",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Wolfkid200444 <32025746+Wolfkid200444@users.noreply.github.com>"
+    }
+  }
+}
