@@ -27,4 +27,4 @@ jobs:
       - run: bunx biome check plugins scripts
       - run: shellcheck --shell=bash .github/scripts/*.sh
       - run: bun run package
-      - run: bun run generate-index --dist build/dist --base-url https://wolfplugs.github.io/valenced-plugins --out /tmp/index.json
+      - run: bun run generate-index --dist build/dist --base-url https://plugins.obamabot.me/valenced-plugins --out /tmp/index.json

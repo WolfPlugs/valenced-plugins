@@ -9,7 +9,7 @@ PetPet, Questify, and Sound Controls.
 
 Add this repository in Valenced's plugin repository settings:
 
-https://wolfplugs.github.io/valenced-plugins
+https://plugins.obamabot.me/valenced-plugins
 
 Install wolf plugins, then reload Valenced.
 
