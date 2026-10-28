@@ -1,0 +1,19 @@
+plugins/add-attachments/index.ts
+  s_b1690d31ba6595::t_a43ced13e0baa8 2,4,9,54-55,57-58,102-103,110,193-200,202-203,205,258-259,264-266,268
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "0d34f0bcd1c18ccf31d6e3c35f2aaaf55221e1ad",
+  "prompts": {},
+  "sessions": {
+    "s_b1690d31ba6595": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a18049-8a3f-7711-b92d-471a17ed1093",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Wolfkid200444 <32025746+Wolfkid200444@users.noreply.github.com>"
+    }
+  }
+}
