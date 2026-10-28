@@ -1,0 +1,21 @@
+plugins/questify/index.ts
+  s_caaea2d81eb848::t_b75e6cc8f2cac7 6,28-29,36,38
+plugins/questify/quests/store.ts
+  s_caaea2d81eb848::t_c35614c8bb6412 1,5,15-16,27-29
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "2ba2fa412a78de7fcba5dc8e956b1e932b17c498",
+  "prompts": {},
+  "sessions": {
+    "s_caaea2d81eb848": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a18071-04ea-71a1-a465-4d639ac9eefb",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Wolfkid200444 <32025746+Wolfkid200444@users.noreply.github.com>"
+    }
+  }
+}
