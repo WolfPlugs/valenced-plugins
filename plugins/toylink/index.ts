@@ -1,5 +1,6 @@
 import { Dispatcher } from '@valenced/discord/common/flux'
-import { getModules, lookupModule } from '@valenced/modules/finders'
+import { Stores } from '@valenced/discord/flux'
+import { getModules } from '@valenced/modules/finders'
 import { withProps } from '@valenced/modules/finders/filters'
 import { instead } from '@valenced/patcher'
 import { AppState } from 'react-native'
@@ -12,6 +13,7 @@ import {
 } from './control'
 import SettingsComponent from './settings'
 import { stopToys, useToys } from './toys'
+import type { DiscordModules } from '@valenced/discord/types'
 import type { Settings } from './control'
 
 type Sound = {
@@ -49,11 +51,9 @@ export default plugin<{ jsonStorage: Settings }>({
 				})
 		}
 		const currentUser = () => {
-			const [store] = lookupModule(
-				withProps<{ getCurrentUser(): { id: string } | undefined }>(
-					'getCurrentUser',
-				),
-			)
+			const store = Stores.UserStore as DiscordModules.Flux.Store<{
+				getCurrentUser(): { id: string } | undefined
+			}>
 			return store?.getCurrentUser()?.id
 		}
 		const onMessage = (payload: unknown) => {
