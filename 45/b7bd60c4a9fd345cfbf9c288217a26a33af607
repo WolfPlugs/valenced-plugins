@@ -1,0 +1,23 @@
+plugins/bot-client/index.ts
+  s_9fc18b4c6c9224::t_adbdf332e20d42 47
+scripts/bot-client-smoke.ts
+  s_9fc18b4c6c9224::t_adbdf332e20d42 177
+plugins/bot-client/manifest.json
+  s_9fc18b4c6c9224::t_756dccd3ce0339 8
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "45b7bd60c4a9fd345cfbf9c288217a26a33af607",
+  "prompts": {},
+  "sessions": {
+    "s_9fc18b4c6c9224": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a18041-ce96-71b1-bc55-9e07ea0c7fa1",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Wolfkid200444 <32025746+Wolfkid200444@users.noreply.github.com>"
+    }
+  }
+}
