@@ -1,0 +1,19 @@
+plugins/toylink/index.ts
+  s_caaea2d81eb848::t_5d191964032d4e 2-3,16,54-56
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "7eec42d5d1ad84de55c1f0709f4e75630d9ae010",
+  "prompts": {},
+  "sessions": {
+    "s_caaea2d81eb848": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a18071-04ea-71a1-a465-4d639ac9eefb",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Wolfkid200444 <32025746+Wolfkid200444@users.noreply.github.com>"
+    }
+  }
+}
