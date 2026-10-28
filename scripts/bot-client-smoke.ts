@@ -174,7 +174,7 @@ const valenced = {
 					return () => settingsItems.delete(key)
 				},
 				addSettingsItemToSection(section, key) {
-					assert.equal(section, 'REVENGE')
+					assert.equal(section, 'VALENCED')
 					settingsRows.push(key)
 					return () => {
 						settingsRows.splice(settingsRows.indexOf(key), 1)

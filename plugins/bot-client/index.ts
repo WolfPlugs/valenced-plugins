@@ -44,7 +44,7 @@ export default plugin<{ jsonStorage: AccountStorage }>({
 						},
 					}),
 				)
-				cleanup(addSettingsItemToSection('REVENGE', 'WolfieBotClient'))
+				cleanup(addSettingsItemToSection('VALENCED', 'WolfieBotClient'))
 				refreshSettings()
 			}),
 		)
