@@ -32,6 +32,12 @@ export function MediaControls({ store }: { store: SettingsStore }) {
 				))}
 			</Design.TableRowGroup>
 			<Design.TableRowGroup title="Zoom">
+				<Design.TableCheckboxRow
+					value="smoothZoom"
+					label="Smooth double-tap zoom"
+					checked={settings.smoothZoom}
+					onPress={() => store.set({ smoothZoom: !settings.smoothZoom })}
+				/>
 				<Design.TableRow
 					label="Double-tap zoom"
 					trailing={

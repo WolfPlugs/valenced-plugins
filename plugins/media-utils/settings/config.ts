@@ -1,5 +1,6 @@
 export type Settings = {
 	doubleTapZoom: number
+	smoothZoom: boolean
 	rotateImages: boolean
 	rotateVideos: boolean
 	zoomEnabled: boolean
@@ -8,6 +9,7 @@ export type Settings = {
 }
 export const defaultSettings: Settings = {
 	doubleTapZoom: 5,
+	smoothZoom: false,
 	rotateImages: true,
 	rotateVideos: true,
 	zoomEnabled: true,
@@ -27,6 +29,10 @@ export function readSettings(value: unknown): Settings {
 			typeof zoom === 'number' && Number.isFinite(zoom)
 				? Math.max(2, Math.min(10, Math.round(zoom)))
 				: 5,
+		smoothZoom:
+			'smoothZoom' in settings && typeof settings.smoothZoom === 'boolean'
+				? settings.smoothZoom
+				: false,
 		rotateImages:
 			'rotateImages' in settings && typeof settings.rotateImages === 'boolean'
 				? settings.rotateImages

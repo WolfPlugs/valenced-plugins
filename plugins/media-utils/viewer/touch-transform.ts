@@ -83,3 +83,26 @@ export function moveImage(
 					ratio * (Math.sin(turn) * anchorX + Math.cos(turn) * anchorY),
 	}
 }
+
+export function boundImage(
+	value: ImageTransform,
+	viewport: { width: number; height: number },
+	image = viewport,
+): ImageTransform {
+	if (viewport.width <= 0 || viewport.height <= 0) return value
+	const fit = Math.min(
+		viewport.width / image.width,
+		viewport.height / image.height,
+	)
+	const width = image.width * fit * value.scale
+	const height = image.height * fit * value.scale
+	const cos = Math.abs(Math.cos(value.rotation))
+	const sin = Math.abs(Math.sin(value.rotation))
+	const limitX = Math.max(0, (width * cos + height * sin - viewport.width) / 2)
+	const limitY = Math.max(0, (width * sin + height * cos - viewport.height) / 2)
+	return {
+		...value,
+		x: Math.max(-limitX, Math.min(limitX, value.x)),
+		y: Math.max(-limitY, Math.min(limitY, value.y)),
+	}
+}

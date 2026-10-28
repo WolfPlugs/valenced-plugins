@@ -5,7 +5,7 @@
 	"description": "Rotate and zoom media, search images, crop images, and trim and crop video attachments.",
 	"author": "Wolfie <347096063569559553> (https://wolfies.org/ \"Website\") (https://github.com/Wolfkid200444 \"GitHub\")",
 	"icon": "ImageIcon",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"dependencies": {
 		"valenced.api": {
 			"version": ">=1 <2"

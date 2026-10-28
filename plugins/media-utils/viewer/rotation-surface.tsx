@@ -15,7 +15,7 @@ import {
 } from 'react-native'
 import { readSettings } from '../settings/config'
 import FullResolution from './full-resolution'
-import { initialTransform, moveImage } from './touch-transform'
+import { boundImage, initialTransform, moveImage } from './touch-transform'
 import { maximumImageZoom } from './zoom'
 import type { ElementRef, ReactElement, ReactNode, Ref } from 'react'
 import type { GestureResponderEvent, StyleProp, ViewStyle } from 'react-native'
@@ -56,10 +56,12 @@ export default function RotationSurface({
 	const [zoomed, setZoomed] = useState(false)
 	const enabled = useRef(true)
 	const viewport = useRef<ElementRef<typeof NativeView>>(null)
+	const bounds = useRef({ width: 0, height: 0 })
 	const center = useRef({ x: 0, y: 0 })
 	const measureViewport = () =>
 		viewport.current?.measureInWindow((left, top, width, height) => {
 			center.current = { x: left + width / 2, y: top + height / 2 }
+			bounds.current = { width, height }
 		})
 	const transform = useRef(initialTransform())
 	const previous = useRef<readonly TouchPoint[]>([])
@@ -67,28 +69,71 @@ export default function RotationSurface({
 	const scale = useRef(new Animated.Value(1)).current
 	const x = useRef(new Animated.Value(0)).current
 	const y = useRef(new Animated.Value(0)).current
+	const animation = useRef<Animated.CompositeAnimation | null>(null)
 	const reportedZoom = useRef(false)
 	const props = useRef(viewer.props)
 	props.current = viewer.props
 	const detector = viewer.props.children
 	const supported = isValidElement<{ children?: ReactNode }>(detector)
-	const apply = () => {
-		const value = transform.current
-		rotation.setValue(value.rotation)
-		scale.setValue(value.scale)
-		x.setValue(value.x)
-		y.setValue(value.y)
-		const zoomed = value.scale > 1
-		if (zoomed !== reportedZoom.current) {
-			reportedZoom.current = zoomed
-			setZoomed(zoomed)
-			props.current.onZoomChanged?.({ nativeEvent: { zoomScale: value.scale } })
+	const apply = (animate = false) => {
+		const presenter = supported ? detector.props.children : undefined
+		const source = isValidElement<{ source?: unknown }>(presenter)
+			? presenter.props.source
+			: undefined
+		const image =
+			typeof source === 'object' &&
+			source !== null &&
+			'width' in source &&
+			typeof source.width === 'number' &&
+			source.width > 0 &&
+			'height' in source &&
+			typeof source.height === 'number' &&
+			source.height > 0
+				? { width: source.width, height: source.height }
+				: bounds.current
+		transform.current = boundImage(transform.current, bounds.current, image)
+		const value = { ...transform.current }
+		animation.current?.stop()
+		const values = [
+			['rotation', rotation],
+			['scale', scale],
+			['x', x],
+			['y', y],
+		] as const
+		const reportZoom = () => {
+			const zoomed = value.scale > 1
+			if (zoomed !== reportedZoom.current) {
+				reportedZoom.current = zoomed
+				setZoomed(zoomed)
+				props.current.onZoomChanged?.({
+					nativeEvent: { zoomScale: value.scale },
+				})
+			}
+		}
+		if (animate && preferences.current.smoothZoom) {
+			animation.current = Animated.parallel(
+				values.map(([key, animated]) =>
+					Animated.timing(animated, {
+						toValue: value[key],
+						duration: 220,
+						useNativeDriver: false,
+					}),
+				),
+			)
+			// Keep the viewer zoomed until the visible zoom-out has finished.
+			if (value.scale > 1) reportZoom()
+			animation.current.start(({ finished }) => {
+				if (finished) reportZoom()
+			})
+		} else {
+			for (const [key, animated] of values) animated.setValue(value[key])
+			reportZoom()
 		}
 	}
 	const resetTransform = () => {
 		previous.current = []
 		transform.current = initialTransform()
-		apply()
+		apply(true)
 	}
 	useImperativeHandle(viewer.props.ref, () => ({
 		zoomTo(point) {
@@ -103,6 +148,7 @@ export default function RotationSurface({
 			) => {
 				if (!enabled.current) return
 				center.current = { x: left + width / 2, y: top + height / 2 }
+				bounds.current = { width, height }
 				transform.current = {
 					...transform.current,
 					scale: zoomScale,
@@ -117,7 +163,7 @@ export default function RotationSurface({
 								(zoomScale - 1)
 							: 0,
 				}
-				apply()
+				apply(true)
 			}
 			if (viewport.current) viewport.current.measureInWindow(zoom)
 			else zoom(0, 0, 0, 0)
@@ -151,6 +197,7 @@ export default function RotationSurface({
 				(event.nativeEvent.touches.length >= 2 ||
 					Math.hypot(gesture.dx, gesture.dy) > 3),
 			onPanResponderGrant(event) {
+				animation.current?.stop()
 				measureViewport()
 				remember(event)
 			},
@@ -183,6 +230,25 @@ export default function RotationSurface({
 			onPanResponderTerminationRequest: () => false,
 			onShouldBlockNativeResponder: () => true,
 		})
+	}, [rotation, scale, x, y])
+	useEffect(() => {
+		const subscriptions = (
+			[
+				['rotation', rotation],
+				['scale', scale],
+				['x', x],
+				['y', y],
+			] as const
+		).map(([key, animated]) => {
+			const id = animated.addListener(({ value }) => {
+				transform.current[key] = value
+			})
+			return () => animated.removeListener(id)
+		})
+		return () => {
+			animation.current?.stop()
+			for (const unsubscribe of subscriptions) unsubscribe()
+		}
 	}, [rotation, scale, x, y])
 	useEffect(() => {
 		const reset = () => {
