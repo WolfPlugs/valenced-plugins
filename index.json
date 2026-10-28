@@ -222,6 +222,30 @@
           }
         }
       }
+    },
+    "wolfie.toylink": {
+      "name": "ToyLink",
+      "description": "Connect Lovense or Intiface / Buttplug toys and trigger vibration from Discord messages, incoming calls, and notification sounds.",
+      "author": "Wolfie <347096063569559553> (https://wolfies.org/ \"Website\") (https://github.com/Wolfkid200444 \"GitHub\")",
+      "icon": "NotificationsIcon",
+      "channels": {
+        "latest": "1.0.0"
+      },
+      "versions": {
+        "1.0.0": {
+          "url": "https://plugins.obamabot.me/valenced-plugins/pool/wolfie.toylink@1.0.0.zip",
+          "sha256": "f62fa2210a97aa33be7bd78530d81bffeeb7714e93aeac4512e3f8fc6e694a9f",
+          "size": 6477,
+          "dependencies": {
+            "valenced.api": {
+              "version": ">=1 <2"
+            },
+            "discord": {
+              "version": "*"
+            }
+          }
+        }
+      }
     }
   }
 }
