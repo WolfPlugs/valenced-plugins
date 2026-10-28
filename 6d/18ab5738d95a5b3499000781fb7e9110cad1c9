@@ -1,0 +1,29 @@
+plugins/media-utils/manifest.json
+  s_b406fcc1c9ec1a::t_cdce0d5bdbf49b 8
+plugins/media-utils/settings/config.ts
+  s_b406fcc1c9ec1a::t_0c8e84ff1e1e89 3,12,32-35
+plugins/media-utils/settings/index.tsx
+  s_b406fcc1c9ec1a::t_dd2befc99ff071 35-40
+plugins/media-utils/viewer/rotation-surface.tsx
+  s_b406fcc1c9ec1a::t_dbfb0a028a7634 18,59,64,72,78-130,136,151,166,200,234-252
+plugins/media-utils/viewer/touch-transform.ts
+  s_b406fcc1c9ec1a::t_ebb2530a29e2ee 86-108
+tests/media-utils-bounds.test.ts
+  s_b406fcc1c9ec1a::t_b4d3f7663124c2 1-18
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "6d18ab5738d95a5b3499000781fb7e9110cad1c9",
+  "prompts": {},
+  "sessions": {
+    "s_b406fcc1c9ec1a": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1804e-2726-7df3-9724-bbf44180097b",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Wolfkid200444 <32025746+Wolfkid200444@users.noreply.github.com>"
+    }
+  }
+}
