@@ -1,10 +1,12 @@
 import { ToastActionCreators } from '@valenced/discord/actions'
+import { Constants } from '@valenced/discord/common/constants'
 import { Dispatcher } from '@valenced/discord/common/flux'
-import { withStoreName } from '@valenced/discord/flux'
+import { Stores } from '@valenced/discord/flux'
 import { getModules, lookupModule } from '@valenced/modules/finders'
 import { withName, withProps } from '@valenced/modules/finders/filters'
 import { after, instead } from '@valenced/patcher'
 import { uploadAttachment } from './upload'
+import type { DiscordModules } from '@valenced/discord/types'
 import type { Upload } from './upload'
 
 function isEditInput(
@@ -49,11 +51,11 @@ export default plugin({
 	start({ cleanup, plugin }) {
 		const pending = new Map<string, { channelId: string; files: Upload[] }>()
 		const uploadsFor = (channelId: string) =>
-			lookupModule(
-				withStoreName<{
+			(
+				Stores.UploadAttachmentStore as DiscordModules.Flux.Store<{
 					getUploads(channelId: string, draftType: number): Upload[]
-				}>('UploadAttachmentStore'),
-			)[0]?.getUploads(channelId, 0) ?? []
+				}>
+			)?.getUploads(channelId, 0) ?? []
 		const setUploads = (channelId: string, uploads: Upload[]) =>
 			Dispatcher.dispatch({
 				type: 'UPLOAD_ATTACHMENT_SET_UPLOADS',
@@ -97,16 +99,15 @@ export default plugin({
 							if (!edit) return Reflect.apply(original, this, args)
 							let failedResponse: Response | undefined
 							try {
-								const [messages] = lookupModule(
-									withStoreName<{
+								const messages =
+									Stores.MessageStore as DiscordModules.Flux.Store<{
 										getMessage(
 											channelId: string,
 											messageId: string,
 										):
 											| { attachments: { id: string; filename: string }[] }
 											| undefined
-									}>('MessageStore'),
-								)
+									}>
 								const messageId = request.url.split('/').pop()
 								const message =
 									messageId && messages?.getMessage(edit.channelId, messageId)
@@ -189,13 +190,19 @@ export default plugin({
 					cleanup(
 						instead(actions, 'editMessage', function (args, original) {
 							const [channelId, messageId] = args
-							const url = `/channels/${channelId}/messages/${messageId}`
-							if (pending.has(url)) return
-							const [uploads] = lookupModule(
-								withStoreName<{
-									getUploads(channelId: string, draftType: number): Upload[]
-								}>('UploadAttachmentStore'),
+							const endpoints = Constants?.Endpoints
+							if (
+								typeof endpoints !== 'object' ||
+								endpoints === null ||
+								typeof endpoints.MESSAGE !== 'function'
 							)
+								return Reflect.apply(original, this, args)
+							const url: string = endpoints.MESSAGE(channelId, messageId)
+							if (pending.has(url)) return
+							const uploads =
+								Stores.UploadAttachmentStore as DiscordModules.Flux.Store<{
+									getUploads(channelId: string, draftType: number): Upload[]
+								}>
 							const files = uploads?.getUploads(channelId, 0).slice() ?? []
 							if (files.length) pending.set(url, { channelId, files })
 							try {
@@ -248,19 +255,17 @@ export default plugin({
 							cleanup(
 								instead(input, 'handleSaveEditing', function (args, original) {
 									const channelId = getChannelId(refs)
-									const [edits] = lookupModule(
-										withStoreName<{
+									const edits =
+										Stores.EditMessageStore as DiscordModules.Flux.Store<{
 											getEditingMessage(
 												channelId: string,
 											): { id: string; content: string } | undefined
 											getEditingTextValue(channelId: string): string
-										}>('EditMessageStore'),
-									)
-									const [uploads] = lookupModule(
-										withStoreName<{
+										}>
+									const uploads =
+										Stores.UploadAttachmentStore as DiscordModules.Flux.Store<{
 											getUploads(channelId: string, draftType: number): Upload[]
-										}>('UploadAttachmentStore'),
-									)
+										}>
 									const message =
 										channelId && edits?.getEditingMessage(channelId)
 									if (
