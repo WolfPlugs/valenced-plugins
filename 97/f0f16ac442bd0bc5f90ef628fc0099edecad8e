@@ -1,0 +1,40 @@
+scripts/toylink-intiface.test.ts
+  s_e007353b12d8bb::t_e381b88fa88ba1 7-27,30-32,35-37,39-45,55,58-69,73-77,82-85,87-97,107-117,121-125,128-131,139-145,151-159,171-173,175-182,192-197
+  s_e007353b12d8bb::t_e42993bfe6e9ab 1-6,28-29,33-34,38,46-54,56-57,70-72,78-81,86,98-106,118-120,126-127,132-138,146-150,160-170,174,183-191,198
+  s_e007353b12d8bb::t_1da3c78682a5c4 199-200
+plugins/toylink/control.ts
+  s_e007353b12d8bb::t_4b9f9038ae5fe4 1-166
+  s_e007353b12d8bb::t_fe3132cbeb1440 167-170
+plugins/toylink/intiface.ts
+  s_e007353b12d8bb::t_4b9f9038ae5fe4 1-8,18-21,24,42-49,52-54,63-69,91-94,97-104,113-115,119-121,133-139,147,150-155,168,178-183,198,226-229,232-234,238-244,246-248,253-256
+  s_e007353b12d8bb::t_e381b88fa88ba1 9-17,22-23,25-41,50-51,55-62,70-90,95-96,105-112,116-118,122-132,140-146,148-149,156-167,169-177,184-197,199-225,230-231,235-237,245,249-252
+plugins/toylink/toys.ts
+  s_e007353b12d8bb::t_4b9f9038ae5fe4 1-50
+  s_e007353b12d8bb::t_7d3092873051db 51-68
+README.md
+  s_e007353b12d8bb::t_f5051b14d12c27 3,5,47-91
+plugins/toylink/index.ts
+  s_e007353b12d8bb::t_0cdf2131622dda 1-147
+plugins/toylink/manifest.json
+  s_e007353b12d8bb::t_6e3c6161bbd215 1-14
+plugins/toylink/settings.tsx
+  s_e007353b12d8bb::t_88a0652b37b959 1-171
+scripts/toylink.test.ts
+  s_e007353b12d8bb::t_dc553712cb6537 1-110
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "97f0f16ac442bd0bc5f90ef628fc0099edecad8e",
+  "prompts": {},
+  "sessions": {
+    "s_e007353b12d8bb": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a17a32-b63e-74b3-b92f-23194467bff4",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Wolfkid200444 <32025746+Wolfkid200444@users.noreply.github.com>"
+    }
+  }
+}
