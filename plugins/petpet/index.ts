@@ -1,9 +1,9 @@
 import { ToastActionCreators } from '@valenced/discord/actions'
-import { withStoreName } from '@valenced/discord/flux'
-import { lookupModule } from '@valenced/modules/finders'
+import { Stores } from '@valenced/discord/flux'
 import { attachPetPet } from './attachments'
 import { registerPetPet } from './command'
 import { decodePNG, renderPetPet } from './render'
+import type { DiscordModules } from '@valenced/discord/types'
 
 function commandInput(args: unknown, context: unknown) {
 	if (!Array.isArray(args)) throw new Error('Select a user with /petpet user.')
@@ -36,9 +36,9 @@ function commandInput(args: unknown, context: unknown) {
 }
 
 function avatarURL(userId: string) {
-	const [users] = lookupModule(
-		withStoreName<{ getUser(id: string): unknown }>('UserStore'),
-	)
+	const users = Stores.UserStore as DiscordModules.Flux.Store<{
+		getUser(id: string): unknown
+	}>
 	const user = users?.getUser(userId)
 	if (typeof user !== 'object' || user === null)
 		throw new Error('Could not find the selected user.')
@@ -89,9 +89,10 @@ export default plugin({
 					if (buffer.byteLength > 2 * 1024 * 1024)
 						throw new Error('The avatar image is too large.')
 					const bytes = await renderPetPet(decodePNG(buffer), controller.signal)
-					const [channels] = lookupModule(
-						withStoreName<{ getChannelId(): unknown }>('SelectedChannelStore'),
-					)
+					const channels =
+						Stores.SelectedChannelStore as DiscordModules.Flux.Store<{
+							getChannelId(): unknown
+						}>
 					if (!channels)
 						throw new Error('Could not check the current message channel.')
 					const isCurrent = () =>
