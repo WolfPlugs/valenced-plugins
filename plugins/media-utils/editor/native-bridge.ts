@@ -1,13 +1,13 @@
-import { lookupModule } from '@valenced/modules/finders'
-import { withProps } from '@valenced/modules/finders/filters'
+import { Stores } from '@valenced/discord/flux'
 import { callNativeMethod } from '@valenced/modules/native'
+import type { DiscordModules } from '@valenced/discord/types'
 
 type Emoji = { id: string; name: string }
 type Guilds = { getGuilds(): unknown }
 type Emojis = { getGuildEmoji(id: string): unknown }
 export function getEditorEmojis() {
-	const [guilds] = lookupModule(withProps<Guilds>('getGuilds'))
-	const [store] = lookupModule(withProps<Emojis>('getGuildEmoji'))
+	const guilds = Stores.GuildStore as DiscordModules.Flux.Store<Guilds>
+	const store = Stores.EmojiStore as DiscordModules.Flux.Store<Emojis>
 	const all = guilds?.getGuilds()
 	const emojis: Emoji[] = []
 	const seen = new Set<string>()
