@@ -1,11 +1,9 @@
 import { ToastActionCreators } from '@valenced/discord/actions'
-import { lookupModule } from '@valenced/modules/finders'
-import { withProps } from '@valenced/modules/finders/filters'
 import { AppState } from 'react-native'
 import { startCompletionLifecycle } from './completion/lifecycle'
 import { patchQuestLists } from './patches/lists'
 import { patchQuestMenu } from './patches/menus'
-import { readQuests } from './quests/store'
+import { currentAccount, readQuests } from './quests/store'
 import { defaults, normalizeSettings } from './settings/config'
 import SettingsComponent from './settings/index'
 import { scheduleStartupWarning } from './settings/warnings'
@@ -27,22 +25,17 @@ export default plugin<{ jsonStorage: Settings }>({
 		const timer = setInterval(() => {
 			if (AppState.currentState !== 'active') return
 			try {
-				const [users] = lookupModule(
-					withProps<{ getCurrentUser: () => { id: string } | undefined }>(
-						'getCurrentUser',
-					),
-				)
-				const currentAccount = users?.getCurrentUser()?.id
-				if (!currentAccount) {
+				const accountId = currentAccount()
+				if (!accountId) {
 					account = undefined
 					previous.clear()
 					return
 				}
 				const snapshot = readQuests()
 				if (!snapshot.available) return
-				if (currentAccount !== account) {
+				if (accountId !== account) {
 					previous.clear()
-					account = currentAccount
+					account = accountId
 				}
 				for (const quest of snapshot.quests) {
 					if (
