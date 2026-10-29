@@ -1,0 +1,33 @@
+plugins/media-utils/favorites/patches.ts
+  s_b406fcc1c9ec1a::t_fddd5bdc02d70c 6,68,94-97,100
+plugins/media-utils/index.tsx
+  s_b406fcc1c9ec1a::t_15f60cf1da0be7 38-42,120
+plugins/media-utils/manifest.json
+  s_b406fcc1c9ec1a::t_b907ec8397804e 8
+plugins/media-utils/utils/media.ts
+  s_b406fcc1c9ec1a::t_272d2d0e3de164 54-71
+plugins/media-utils/viewer/copy-link.tsx
+  s_b406fcc1c9ec1a::t_7c1aac50e9b815 1-45
+plugins/media-utils/viewer/rotation-surface.tsx
+  s_b406fcc1c9ec1a::t_ba826b62920f63 12,18,20-25,53,55,62-88,115,172-182
+plugins/media-utils/viewer/touch-transform.ts
+  s_b406fcc1c9ec1a::t_2c94f0a06143be 109-128
+tests/media-utils-bounds.test.ts
+  s_b406fcc1c9ec1a::t_3cccb86a3c3510 2-6,23-55
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "388157b8bd438e44e9c4c04bc08b55b90ef382d6",
+  "prompts": {},
+  "sessions": {
+    "s_b406fcc1c9ec1a": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1804e-2726-7df3-9724-bbf44180097b",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Wolfkid200444 <32025746+Wolfkid200444@users.noreply.github.com>"
+    }
+  }
+}
