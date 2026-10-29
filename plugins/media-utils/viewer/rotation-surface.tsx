@@ -9,13 +9,20 @@ import {
 } from 'react'
 import {
 	Animated,
+	Image as NativeImage,
 	View as NativeView,
 	PanResponder,
 	StyleSheet,
 } from 'react-native'
 import { readSettings } from '../settings/config'
+import { readMediaSize, readMediaSource } from '../utils/media'
 import FullResolution from './full-resolution'
-import { boundImage, initialTransform, moveImage } from './touch-transform'
+import {
+	boundImage,
+	initialTransform,
+	isPointOnImage,
+	moveImage,
+} from './touch-transform'
 import { maximumImageZoom } from './zoom'
 import type { ElementRef, ReactElement, ReactNode, Ref } from 'react'
 import type { GestureResponderEvent, StyleProp, ViewStyle } from 'react-native'
@@ -43,13 +50,42 @@ export default function RotationSurface({
 	reportError,
 	store,
 	kind,
+	source,
 }: {
+	source: unknown
 	store: SettingsStore
 	kind: 'image' | 'video'
 	reportError: (error: unknown) => void
 	viewer: ReactElement<ViewerProps>
 }) {
 	const settings = readSettings(store.use())
+	const media = readMediaSource(source)
+	const uri = media?.uri
+	const [loadedSize, setLoadedSize] = useState<{
+		uri: string
+		width: number
+		height: number
+	} | null>(null)
+	const imageSize =
+		readMediaSize(source) ?? (loadedSize?.uri === uri ? loadedSize : undefined)
+	const hasImageSize = readMediaSize(source) !== undefined
+	useEffect(() => {
+		if (hasImageSize || !uri || kind !== 'image') return
+		let cancelled = false
+		NativeImage.getSize(
+			uri,
+			(width, height) => {
+				if (!cancelled && width > 0 && height > 0)
+					setLoadedSize({ uri, width, height })
+			},
+			error => {
+				if (!cancelled) reportError(error)
+			},
+		)
+		return () => {
+			cancelled = true
+		}
+	}, [hasImageSize, uri, kind, reportError])
 	const preferences = useRef(settings)
 	preferences.current = settings
 	const [active, setActive] = useState(true)
@@ -76,21 +112,7 @@ export default function RotationSurface({
 	const detector = viewer.props.children
 	const supported = isValidElement<{ children?: ReactNode }>(detector)
 	const apply = (animate = false) => {
-		const presenter = supported ? detector.props.children : undefined
-		const source = isValidElement<{ source?: unknown }>(presenter)
-			? presenter.props.source
-			: undefined
-		const image =
-			typeof source === 'object' &&
-			source !== null &&
-			'width' in source &&
-			typeof source.width === 'number' &&
-			source.width > 0 &&
-			'height' in source &&
-			typeof source.height === 'number' &&
-			source.height > 0
-				? { width: source.width, height: source.height }
-				: bounds.current
+		const image = imageSize ?? bounds.current
 		transform.current = boundImage(transform.current, bounds.current, image)
 		const value = { ...transform.current }
 		animation.current?.stop()
@@ -147,6 +169,17 @@ export default function RotationSurface({
 				height: number,
 			) => {
 				if (!enabled.current) return
+				const image = imageSize
+				if (
+					image &&
+					!isPointOnImage(
+						{ x: point.x - left, y: point.y - top },
+						transform.current,
+						{ width, height },
+						image,
+					)
+				)
+					return
 				center.current = { x: left + width / 2, y: top + height / 2 }
 				bounds.current = { width, height }
 				transform.current = {

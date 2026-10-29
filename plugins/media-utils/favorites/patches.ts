@@ -3,6 +3,7 @@
 import { getModules } from '@valenced/modules/finders'
 import { withProps } from '@valenced/modules/finders/filters'
 import { instead } from '@valenced/patcher'
+import { withCopyLink } from '../viewer/copy-link'
 
 const videoExtension = /\.(?:mp4|webm|mov|avi|mkv|flv|wmv|m4v|gifv)(?:[?#]|$)/i
 
@@ -64,6 +65,7 @@ export function normalizeFavorite(data: unknown) {
 export function patchFavorites(
 	cleanup: (callback: () => void) => void,
 	enabled: () => boolean,
+	reportError: (error: unknown) => void,
 ) {
 	const patchedButtons = new WeakSet<object>()
 	const thumbnails = new WeakMap<unknown[], unknown[]>()
@@ -82,7 +84,6 @@ export function patchFavorites(
 				patchedButtons.add(button)
 				cleanup(
 					instead(button, 'type', function (args, original) {
-						if (!enabled()) return Reflect.apply(original, this, args)
 						const props = args[0]
 						if (
 							typeof props !== 'object' ||
@@ -90,10 +91,13 @@ export function patchFavorites(
 							!('source' in props)
 						)
 							return Reflect.apply(original, this, args)
-						return Reflect.apply(original, this, [
-							{ ...props, source: favoritableSource(props.source) },
+						const result = Reflect.apply(original, this, [
+							enabled()
+								? { ...props, source: favoritableSource(props.source) }
+								: props,
 							...args.slice(1),
 						])
+						return withCopyLink(result, props.source, reportError)
 					}),
 				)
 			},

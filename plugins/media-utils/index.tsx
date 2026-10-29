@@ -35,7 +35,11 @@ export default {
 		patchViewerLongPress(cleanup, reportError, jsonStorage)
 		patchZoomLimit(cleanup, () => readSettings(jsonStorage.cache).zoomEnabled)
 		patchNativeResolution(cleanup)
-		patchFavorites(cleanup, () => readSettings(jsonStorage.cache).favoriteMedia)
+		patchFavorites(
+			cleanup,
+			() => readSettings(jsonStorage.cache).favoriteMedia,
+			reportError,
+		)
 		cleanup(
 			getModules(
 				withProps<{
@@ -113,6 +117,7 @@ export default {
 									key={source.uri}
 									viewer={viewer}
 									kind={source.kind}
+									source={props.source}
 									store={jsonStorage}
 									reportError={reportError}
 								/>

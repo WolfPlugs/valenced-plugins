@@ -51,3 +51,21 @@ export const searchEngines = {
 	TinEye: 'https://www.tineye.com/search?url=',
 	ImgOps: 'https://imgops.com/start?url=',
 }
+
+export function readMediaSize(value: unknown) {
+	if (Array.isArray(value)) value = value[0]
+	if (
+		typeof value !== 'object' ||
+		value === null ||
+		!('width' in value) ||
+		typeof value.width !== 'number' ||
+		!Number.isFinite(value.width) ||
+		value.width <= 0 ||
+		!('height' in value) ||
+		typeof value.height !== 'number' ||
+		!Number.isFinite(value.height) ||
+		value.height <= 0
+	)
+		return
+	return { width: value.width, height: value.height }
+}

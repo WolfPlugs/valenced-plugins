@@ -106,3 +106,23 @@ export function boundImage(
 		y: Math.max(-limitY, Math.min(limitY, value.y)),
 	}
 }
+
+export function isPointOnImage(
+	point: { x: number; y: number },
+	value: ImageTransform,
+	viewport: { width: number; height: number },
+	image: { width: number; height: number },
+) {
+	const fit = Math.min(
+		viewport.width / image.width,
+		viewport.height / image.height,
+	)
+	const x = point.x - viewport.width / 2 - value.x
+	const y = point.y - viewport.height / 2 - value.y
+	const cos = Math.cos(value.rotation)
+	const sin = Math.sin(value.rotation)
+	return (
+		Math.abs(cos * x + sin * y) <= (image.width * fit * value.scale) / 2 &&
+		Math.abs(-sin * x + cos * y) <= (image.height * fit * value.scale) / 2
+	)
+}
