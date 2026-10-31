@@ -1,0 +1,53 @@
+plugins/questify/manifest.json
+  s_d077369cb9739e::t_3cb8e55ec333eb 8
+  s_d077369cb9739e::t_a29d14a4ab3718 18-22
+plugins/questify/src/main/kotlin/org/wolfies/questify/Questify.kt
+  s_d077369cb9739e::t_34083f4e7821e7 13-14,23,26,28,48,77-85,95
+  s_d077369cb9739e::t_a29d14a4ab3718 1-12,15-22,24-25,27,29-47,49-76,86-94,96-99
+plugins/questify/completion/lifecycle.ts
+  s_d077369cb9739e::t_235f3cf08dd2f2 6
+  s_d077369cb9739e::t_7c89c0164e8b1e 7-10,20-21
+plugins/questify/completion/service.ts
+  s_d077369cb9739e::t_9507c5e3db615c 2,123-125,127-131
+  s_d077369cb9739e::t_34083f4e7821e7 5,17-19,83-84,126
+  s_d077369cb9739e::t_cc0deda66174d2 119-122
+  s_d077369cb9739e::t_235f3cf08dd2f2 16,20-21,81-82,85-86
+  s_d077369cb9739e::t_f858780ffe2970 11,116-118,132-134
+plugins/questify/completion/desktop-heartbeat.ts
+  s_d077369cb9739e::t_cc0deda66174d2 9,20,23-25,28,31
+  s_d077369cb9739e::t_235f3cf08dd2f2 26,42-43
+  s_d077369cb9739e::t_f858780ffe2970 1-8,10-19,21-22,27,29-30,32-41,44-45
+  s_d077369cb9739e::t_d7eb73b8ab426a 46-55
+plugins/questify/quests/store.ts
+  s_d077369cb9739e::t_973fbb36e1534e 16-17
+  s_d077369cb9739e::t_c0b786afcbc3b9 18-19,40
+plugins/questify/settings/index.tsx
+  s_d077369cb9739e::t_973fbb36e1534e 36-46,54-55
+  s_d077369cb9739e::t_5c5265bf1c33ba 56-57,123-128
+plugins/questify/completion/requests.ts
+  s_d077369cb9739e::t_235f3cf08dd2f2 7-16,20
+  s_d077369cb9739e::t_6df09057f51de5 21,23
+tests/questify-desktop-heartbeat.test.ts
+  s_d077369cb9739e::t_201c4157f5d406 1-2,4-17,19-22,24,29-30,63,79
+  s_d077369cb9739e::t_1d03c27a4350b1 3,31-62,66-68,71-77
+  s_d077369cb9739e::t_cc0deda66174d2 18,23,25-28
+  s_d077369cb9739e::t_d049ffb38624b6 64-65,69-70,78,80-84
+tests/questify-store.test.ts
+  s_d077369cb9739e::t_8a63048127ab7b 1-36
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "11b54d303c994d2504196f57bc66fc200e977ed9",
+  "prompts": {},
+  "sessions": {
+    "s_d077369cb9739e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1900d-a660-7982-a75b-d5dd91c11334",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Wolfkid200444 <32025746+Wolfkid200444@users.noreply.github.com>"
+    }
+  }
+}
