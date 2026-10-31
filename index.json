@@ -221,13 +221,26 @@
       "author": "Wolfie <347096063569559553> (https://wolfies.org/ \"Website\") (https://github.com/Wolfkid200444 \"GitHub\")",
       "icon": "QuestsIcon",
       "channels": {
-        "latest": "1.0.0"
+        "latest": "1.0.1"
       },
       "versions": {
         "1.0.0": {
           "url": "https://plugins.obamabot.me/valenced-plugins/pool/wolfie.questify@1.0.0.zip",
           "sha256": "22ff4a4aedc5cf8abf2ab63285bbbc5ba332116e507cb9fbeb2f076dac32f205",
           "size": 9083,
+          "dependencies": {
+            "valenced.api": {
+              "version": ">=1 <2"
+            },
+            "discord": {
+              "version": "*"
+            }
+          }
+        },
+        "1.0.1": {
+          "url": "https://plugins.obamabot.me/valenced-plugins/pool/wolfie.questify@1.0.1.zip",
+          "sha256": "091fc18cef356d0c78137ac0480f74081a968cbee8ee6daf8206ee53aba953ff",
+          "size": 17259,
           "dependencies": {
             "valenced.api": {
               "version": ">=1 <2"
