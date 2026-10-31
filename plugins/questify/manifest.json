@@ -5,7 +5,7 @@
 	"description": "Browse Discord quests, track progress, and auto-complete supported quests from their menus.",
 	"author": "Wolfie <347096063569559553> (https://wolfies.org/ \"Website\") (https://github.com/Wolfkid200444 \"GitHub\")",
 	"icon": "QuestsIcon",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"dependencies": {
 		"valenced.api": {
 			"version": ">=1 <2"
@@ -15,6 +15,10 @@
 		}
 	},
 	"dist": {
-		"script": "index.js"
+		"script": "index.js",
+		"android": {
+			"path": "plugin.jar",
+			"class": "org.wolfies.questify.Questify"
+		}
 	}
 }

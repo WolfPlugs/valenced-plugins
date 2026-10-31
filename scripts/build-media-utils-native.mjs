@@ -10,9 +10,12 @@ for (const name of [
 	'COROUTINES_JAR',
 ]) {
 	if (!process.env[name])
-		throw new Error(`Set ${name} before building native MediaUtils`)
+		throw new Error(
+			`Set ${name} before building native ${process.argv[2] ?? 'media-utils'}`,
+		)
 }
-const output = 'plugins/media-utils/build/native'
+const pluginName = process.argv[2] ?? 'media-utils'
+const output = `plugins/${pluginName}/build/native`
 mkdirSync(output, { recursive: true })
 function run(command, args) {
 	const result = spawnSync(command, args, { stdio: 'inherit' })
@@ -21,7 +24,7 @@ function run(command, args) {
 }
 const kotlin = process.env.KOTLIN_HOME
 run(join(kotlin, 'bin/kotlinc'), [
-	'plugins/media-utils/src/main/kotlin',
+	`plugins/${pluginName}/src/main/kotlin`,
 	'-classpath',
 	[
 		process.env.ANDROID_JAR,

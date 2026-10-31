@@ -1,15 +1,24 @@
 import { Dispatcher } from '@valenced/discord/common/flux'
+import { lookupModuleWithImportedPath } from '@valenced/discord/utils/modules/finders'
 import { lookupModule } from '@valenced/modules/finders'
 import { withProps } from '@valenced/modules/finders/filters'
+import { callNativeMethod } from '@valenced/modules/native'
 import { AppState } from 'react-native'
 import { currentAccount, readQuests, refreshQuests } from '../quests/store'
 import { defaults } from '../settings/config'
 import { completionAllowed } from '../settings/warning-policy'
 import { createCompletionController } from './controller'
+import { sendDesktopHeartbeat } from './desktop-heartbeat'
 import { callQuestAction, callQuestHeartbeat } from './requests'
 import type { Settings } from '../settings/config'
 
 let settings = defaults
+let reportRequestError: ((error: unknown) => void) | undefined
+export function setCompletionErrorReporter(
+	reporter?: (error: unknown) => void,
+) {
+	reportRequestError = reporter
+}
 export function configureCompletion(value: Settings) {
 	settings = value
 	if (!completionAllowed(settings)) completion.stopAll()
@@ -69,6 +78,12 @@ async function request(action: () => Promise<unknown>) {
 				)
 			}),
 		])
+	} catch (error) {
+		// Report only the formatted error, never request headers or raw responses.
+		const message =
+			error instanceof Error ? error.message : 'Quest request failed.'
+		reportRequestError?.(new Error(`[Questify request] ${message}`))
+		throw error
 	} finally {
 		clearTimeout(timer)
 	}
@@ -98,7 +113,25 @@ export const completion = createCompletionController({
 			if (task && progress >= task.target) await refreshQuests()
 		}),
 	heartbeat: (questId, applicationId, terminal) =>
-		request(() => {
+		request(async () => {
+			const quest = readQuests().quests.find(quest => quest.id === questId)
+			if (quest?.tasks.some(task => task.name === 'PLAY_ON_DESKTOP')) {
+				const auth = lookupModuleWithImportedPath<{
+					default: { getToken(): string | null }
+				}>('stores/AuthenticationStore.tsx')[0]?.default
+				const token = auth?.getToken()
+				if (!token)
+					throw new Error('Sign in to Discord before starting this quest.')
+				await sendDesktopHeartbeat(
+					(...args) => callNativeMethod('wolfie.questify.heartbeat', args),
+					questId,
+					applicationId,
+					terminal,
+					token,
+				)
+				await refreshQuests()
+				return
+			}
 			const api = actions()
 			if (!api)
 				throw new Error('Quest actions are unavailable. Open Quests first.')

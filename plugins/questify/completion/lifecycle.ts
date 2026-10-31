@@ -3,7 +3,11 @@ import { patchVideoFocus } from '../patches/video-focus'
 import { currentAccount, readQuests, refreshQuests } from '../quests/store'
 import { normalizeSettings } from '../settings/config'
 import { completionAllowed } from '../settings/warning-policy'
-import { completion, configureCompletion } from './service'
+import {
+	completion,
+	configureCompletion,
+	setCompletionErrorReporter,
+} from './service'
 import { resumableQuests, savedQuestIds, shouldAutoComplete } from './state'
 import type { JsonStorage } from '@valenced/json-storage'
 import type { Settings } from '../settings/config'
@@ -13,6 +17,8 @@ export function startCompletionLifecycle(
 	storage: JsonStorage<Settings>,
 	reportError: (error: unknown) => void,
 ) {
+	setCompletionErrorReporter(reportError)
+	cleanup(() => setCompletionErrorReporter())
 	let settings = normalizeSettings(storage.cache)
 	let account: string | undefined
 	let pendingResume = new Set<string>()

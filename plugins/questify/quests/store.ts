@@ -13,7 +13,10 @@ type MobileQuestStore = {
 
 export function readQuests() {
 	const store =
-		Stores.QuestsStore as DiscordModules.Flux.Store<MobileQuestStore>
+		(Stores.QuestsStore as
+			| DiscordModules.Flux.Store<MobileQuestStore>
+			| undefined) ??
+		lookupModule(withProps<MobileQuestStore>('getQuest', 'getQuestConfig'))[0]
 	if (!store) return { available: false, quests: [] }
 	const quests = new Map(
 		[...parseQuests(store.claimedQuests), ...parseQuests(store.quests)].map(
@@ -34,9 +37,7 @@ export async function refreshQuests() {
 	const [actions] = lookupModule(
 		withProps<{
 			fetchCurrentQuests(): Promise<unknown>
-			enrollInQuest: unknown
-			updateVideoProgress: unknown
-		}>('fetchCurrentQuests', 'enrollInQuest', 'updateVideoProgress'),
+		}>('fetchCurrentQuests'),
 	)
 	if (!actions)
 		throw new Error(

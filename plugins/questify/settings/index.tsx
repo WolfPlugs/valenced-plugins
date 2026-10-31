@@ -33,15 +33,28 @@ export default function SettingsComponent({ api: { jsonStorage } }: Props) {
 	})
 	const [error, setError] = useState('')
 	useEffect(() => {
+		let disposed = false
+		void refreshQuests()
+			.then(() => {
+				if (!disposed) setSnapshot(readQuests())
+			})
+			.catch(error => {
+				if (!disposed)
+					setError(
+						error instanceof Error ? error.message : 'Could not load quests.',
+					)
+			})
 		const timer = setInterval(() => {
 			try {
 				setSnapshot(readQuests())
-				setError('')
 			} catch {
 				setError('Could not read quests on this Discord version.')
 			}
 		}, 5000)
-		return () => clearInterval(timer)
+		return () => {
+			disposed = true
+			clearInterval(timer)
+		}
 	}, [])
 	const quests = snapshot.quests.filter(quest =>
 		questVisible(quest, settings, completion.canComplete),
@@ -107,8 +120,12 @@ export default function SettingsComponent({ api: { jsonStorage } }: Props) {
 								await refreshQuests()
 								setSnapshot(readQuests())
 								setError('')
-							} catch {
-								setError('Could not read quests on this Discord version.')
+							} catch (error) {
+								setError(
+									error instanceof Error
+										? error.message
+										: 'Could not load quests.',
+								)
 							}
 						}}
 					/>
