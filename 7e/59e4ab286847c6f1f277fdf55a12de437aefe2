@@ -1,0 +1,46 @@
+gradle.properties
+  s_d077369cb9739e::t_33680db298a34d 1-4
+gradle/libs.versions.toml
+  s_d077369cb9739e::t_165457c81e9ffa 11
+  s_d077369cb9739e::t_6fd10d3072b457 15
+  s_d077369cb9739e::t_9108576a088043 1-10,12-14,16-25
+.github/workflows/validate.yml
+  s_d077369cb9739e::t_165457c81e9ffa 21-23
+  s_d077369cb9739e::t_688813cd0cec05 19,28,31-32
+settings.gradle.kts
+  s_d077369cb9739e::t_11324a0eed911c 1-41
+.github/workflows/release.yml
+  s_d077369cb9739e::t_ac5adc27a0e5ad 45-50
+  s_d077369cb9739e::t_688813cd0cec05 34,54-55
+build.gradle.kts
+  s_d077369cb9739e::t_165457c81e9ffa 19,172,229,236
+  s_d077369cb9739e::t_3c3d803b5d0f84 1-10,12-18,20-21,23-25,27-171,173-174,177-184,186-198,200-228,230-235,237-324,328-395
+  s_d077369cb9739e::t_9ca570258b893a 26,199
+  s_d077369cb9739e::t_6fd10d3072b457 11,22,175-176,185,325-327
+gradle/wrapper/gradle-wrapper.properties
+  s_d077369cb9739e::t_b9f467f930098f 1-7
+README.md
+  s_d077369cb9739e::t_35edfd4563bb23 5
+gradlew
+  s_d077369cb9739e::t_e9d838af16d31e 1-252
+gradlew.bat
+  s_d077369cb9739e::t_3884cbd371bdf1 1-94
+package.json
+  s_d077369cb9739e::t_f50228f2846fb8 6-7,13-16
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "7e59e4ab286847c6f1f277fdf55a12de437aefe2",
+  "prompts": {},
+  "sessions": {
+    "s_d077369cb9739e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1900d-a660-7982-a75b-d5dd91c11334",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Wolfkid200444 <32025746+Wolfkid200444@users.noreply.github.com>"
+    }
+  }
+}
