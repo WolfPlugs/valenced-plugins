@@ -3,15 +3,17 @@
 	"private": true,
 	"type": "module",
 	"scripts": {
-		"build": "bun scripts/build-media-utils-canvas.ts && valenced-plugin build",
-		"build:dev": "bun scripts/build-media-utils-canvas.ts && valenced-plugin build --dev",
+		"build": "valenced-plugin build",
+		"build:dev": "valenced-plugin build --dev",
 		"generate-index": "valenced-plugin generate-index",
 		"plan-releases": "valenced-plugin plan-releases",
 		"serve": "valenced-plugin serve",
 		"lint": "biome check",
 		"lint:types": "tsc --noEmit",
-		"package": "bun run build && bun scripts/package.mjs",
-		"test": "for file in scripts/*.test.ts; do bun test \"$file\" || exit; done"
+		"package": "./gradlew --no-daemon packageAllPlugins",
+		"test": "bun test tests",
+		"prebuild": "bun tools/build-media-utils-canvas.ts",
+		"prebuild:dev": "bun tools/build-media-utils-canvas.ts"
 	},
 	"dependencies": {
 		"@pdf-lib/upng": "^1.0.1",

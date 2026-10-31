@@ -31,10 +31,7 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '17'
-
-      - name: Set up native plugin compiler
-        run: bash .github/scripts/setup-native.sh
+          java-version: '25'
 
       - run: bun install --frozen-lockfile
 
@@ -45,9 +42,17 @@ jobs:
         id: plan
         run: .github/scripts/plan-releases.sh
 
+      - name: Set up Android SDK
+        if: steps.plan.outputs.count != '0'
+        uses: android-actions/setup-android@v3
+        with:
+          packages: 'platform-tools platforms;android-36 build-tools;37.0.0'
+
       - name: Build plugins
         if: steps.plan.outputs.count != '0'
         run: bun run package
+        env:
+          GITHUB_TOKEN: ${{ secrets.READ_PACKAGES_TOKEN }}
 
       - name: Publish to the pool
         if: steps.plan.outputs.count != '0'

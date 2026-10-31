@@ -16,15 +16,18 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '17'
+          java-version: '25'
 
-      - name: Set up native plugin compiler
-        run: bash .github/scripts/setup-native.sh
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: 'platform-tools platforms;android-36 build-tools;37.0.0'
 
       - run: bun install --frozen-lockfile
       - run: bun run test
       - run: bun run lint:types
-      - run: bunx biome check plugins scripts
+      - run: bunx biome check plugins tools tests
       - run: shellcheck --shell=bash .github/scripts/*.sh
       - run: bun run package
+        env:
+          GITHUB_TOKEN: ${{ secrets.READ_PACKAGES_TOKEN }}
       - run: bun run generate-index --dist build/dist --base-url https://plugins.obamabot.me/valenced-plugins --out /tmp/index.json
