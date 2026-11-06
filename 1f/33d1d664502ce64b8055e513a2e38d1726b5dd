@@ -1,0 +1,14 @@
+plugins/media-utils/manifest.json
+  h_0d2b7dea709e7c 8
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "1f33d1d664502ce64b8055e513a2e38d1726b5dd",
+  "prompts": {},
+  "humans": {
+    "h_0d2b7dea709e7c": {
+      "author": "Wolfkid200444 <32025746+Wolfkid200444@users.noreply.github.com>"
+    }
+  }
+}
