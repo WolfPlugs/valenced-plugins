@@ -1,0 +1,21 @@
+.github/workflows/release.yml
+  s_b406fcc1c9ec1a::t_a128e7a5674715 14,56
+.github/workflows/validate.yml
+  s_b406fcc1c9ec1a::t_2905773c246856 9,33
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "5ee8590bd4d60df39c6e0eae150f2dee142c855a",
+  "prompts": {},
+  "sessions": {
+    "s_b406fcc1c9ec1a": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1804e-2726-7df3-9724-bbf44180097b",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Wolfkid200444 <32025746+Wolfkid200444@users.noreply.github.com>"
+    }
+  }
+}
