@@ -11,6 +11,7 @@ concurrency:
 
 permissions:
   contents: write
+  packages: read
 
 env:
   POOL_BRANCH: ${{ vars.POOL_BRANCH }}
@@ -52,7 +53,7 @@ jobs:
         if: steps.plan.outputs.count != '0'
         run: bun run package
         env:
-          GITHUB_TOKEN: ${{ secrets.READ_PACKAGES_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.READ_PACKAGES_TOKEN || github.token }}
 
       - name: Publish to the pool
         if: steps.plan.outputs.count != '0'
