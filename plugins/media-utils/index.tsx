@@ -4,6 +4,7 @@ import { instead } from '@valenced/patcher'
 import { isValidElement } from 'react'
 import { patchImageEditor } from './editor'
 import { patchFavorites } from './favorites/patches'
+import { patchFilePreviews } from './file-previews'
 import { patchAttachmentMenu } from './menus/attachment-menu'
 import MediaOptionsIcon from './menus/options-icon'
 import { patchViewerLongPress } from './menus/viewer-menu'
@@ -30,6 +31,7 @@ export default {
 		cleanup(resetRotations)
 		cleanup(closeSheets)
 		cleanup(closeMediaOptions)
+		patchFilePreviews(cleanup, jsonStorage, reportError)
 		patchImageEditor(cleanup, reportError)
 		patchAttachmentMenu(cleanup, reportError, jsonStorage)
 		patchViewerLongPress(cleanup, reportError, jsonStorage)

@@ -1,6 +1,9 @@
 export type Settings = {
 	doubleTapZoom: number
 	smoothZoom: boolean
+	previewPsd: boolean
+	previewNef: boolean
+	highQualityPreviews: boolean
 	rotateImages: boolean
 	rotateVideos: boolean
 	zoomEnabled: boolean
@@ -10,6 +13,9 @@ export type Settings = {
 export const defaultSettings: Settings = {
 	doubleTapZoom: 5,
 	smoothZoom: false,
+	previewPsd: false,
+	previewNef: false,
+	highQualityPreviews: false,
 	rotateImages: true,
 	rotateVideos: true,
 	zoomEnabled: true,
@@ -29,6 +35,11 @@ export function readSettings(value: unknown): Settings {
 			typeof zoom === 'number' && Number.isFinite(zoom)
 				? Math.max(2, Math.min(10, Math.round(zoom)))
 				: 5,
+		previewPsd: 'previewPsd' in settings && settings.previewPsd === true,
+		previewNef: 'previewNef' in settings && settings.previewNef === true,
+		highQualityPreviews:
+			'highQualityPreviews' in settings &&
+			settings.highQualityPreviews === true,
 		smoothZoom:
 			'smoothZoom' in settings && typeof settings.smoothZoom === 'boolean'
 				? settings.smoothZoom

@@ -2,6 +2,7 @@ import Page from '@valenced/components/Page'
 import { ActionSheetActionCreators } from '@valenced/discord/actions'
 import { Design } from '@valenced/discord/design'
 import { ScrollView } from 'react-native'
+import { refreshFilePreviews } from '../file-previews'
 import { readSettings } from './config'
 import type { PluginSettingsComponent } from '@valenced/plugins/types'
 import type { ComponentProps } from 'react'
@@ -30,6 +31,30 @@ export function MediaControls({ store }: { store: SettingsStore }) {
 						onPress={() => store.set({ [key]: !settings[key] })}
 					/>
 				))}
+			</Design.TableRowGroup>
+			<Design.TableRowGroup title="File previews">
+				{(
+					[
+						['previewPsd', 'Preview PSD files'],
+						['previewNef', 'Preview Nikon NEF / NRW files'],
+						['highQualityPreviews', 'High-quality file previews'],
+					] as const
+				).map(([key, label]) => (
+					<Design.TableCheckboxRow
+						key={key}
+						value={key}
+						label={label}
+						checked={settings[key]}
+						onPress={() => {
+							store.set({ [key]: !settings[key] })
+							refreshFilePreviews()
+						}}
+					/>
+				))}
+				<Design.TableRow
+					label="Preview quality"
+					subLabel="High quality uses the merged PSD image or largest Nikon JPEG. Uses more data and memory. Unsupported PSDs fall back to the saved thumbnail. Originals stay downloadable."
+				/>
 			</Design.TableRowGroup>
 			<Design.TableRowGroup title="Zoom">
 				<Design.TableCheckboxRow
