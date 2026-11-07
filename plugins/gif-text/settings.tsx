@@ -11,16 +11,42 @@ const { TableRowGroup, TableSwitchRow } = Design
 type Props = ComponentProps<PluginSettingsComponent<{ jsonStorage: Settings }>>
 
 export default function SettingsComponent({ api: { jsonStorage } }: Props) {
-	const settings = jsonStorage.use() ?? defaultSettings
+	const settings = { ...defaultSettings, ...jsonStorage.use() }
 	return (
 		<ScrollView style={{ flex: 1 }}>
 			<Page>
 				<TableRowGroup>
 					<TableSwitchRow
-						label="Attach media as files"
-						subLabel="Attached the GIF or any media from the gif picker as a file to be sent along ur text"
+						label="Attach as file by default"
+						subLabel="Tap a GIF to attach it as a file. Turn off to add its link to your draft."
 						value={settings.attachGif}
 						onValueChange={attachGif => jsonStorage.set({ attachGif })}
+					/>
+				</TableRowGroup>
+				<TableRowGroup title="GIF long-press menu">
+					<TableSwitchRow
+						label="Show Send to chat"
+						subLabel="Add the GIF link to your message draft."
+						value={settings.showSendToChat}
+						onValueChange={showSendToChat =>
+							jsonStorage.set({ showSendToChat })
+						}
+					/>
+					<TableSwitchRow
+						label="Show Attach as file"
+						subLabel="Download and attach the GIF to your message draft as a file."
+						value={settings.showAttachFile}
+						onValueChange={showAttachFile =>
+							jsonStorage.set({ showAttachFile })
+						}
+					/>
+					<TableSwitchRow
+						label="Show Copy Link"
+						subLabel="Show the option to copy the GIF link to your clipboard."
+						value={!settings.hideCopyLink}
+						onValueChange={showCopyLink =>
+							jsonStorage.set({ hideCopyLink: !showCopyLink })
+						}
 					/>
 				</TableRowGroup>
 			</Page>
