@@ -68,17 +68,30 @@
     },
     "wolfie.gif-text": {
       "name": "Gif Text",
-      "description": "Add GIF URLs to your message draft so you can send them with text.",
+      "description": "Add GIF links or file attachments to your message draft, with configurable picker actions.",
       "author": "Wolfie <347096063569559553> (https://wolfies.org/ \"Website\") (https://github.com/Wolfkid200444 \"GitHub\")",
       "icon": "GifIcon",
       "channels": {
-        "latest": "1.0.0"
+        "latest": "1.0.1"
       },
       "versions": {
         "1.0.0": {
           "url": "https://plugins.obamabot.me/valenced-plugins/pool/wolfie.gif-text@1.0.0.zip",
           "sha256": "9ded8396b5d9e1338f364fb43e764a17794431d1933c4f7611b8377b1b4f4245",
           "size": 3671,
+          "dependencies": {
+            "valenced.api": {
+              "version": ">=1 <2"
+            },
+            "discord": {
+              "version": "*"
+            }
+          }
+        },
+        "1.0.1": {
+          "url": "https://plugins.obamabot.me/valenced-plugins/pool/wolfie.gif-text@1.0.1.zip",
+          "sha256": "e82b5b5ed8583225c19d8598d69cf56c7b703c5d2a807d83cedf1ca172f1ed52",
+          "size": 4348,
           "dependencies": {
             "valenced.api": {
               "version": ">=1 <2"
