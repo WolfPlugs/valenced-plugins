@@ -3,6 +3,8 @@ import { useEffect, useRef, useState } from 'react'
 import { Image, PanResponder, View } from 'react-native'
 import { precisionTrimWindow, trimHandleTime } from './trim-range'
 
+export type TimelineFrames = { from: number; span: number; images: string[] }
+
 export function Timeline({
 	duration,
 	start,
@@ -11,24 +13,42 @@ export function Timeline({
 	frames,
 	onTrim,
 	onSeek,
+	onFrames,
 }: {
 	duration: number
 	start: number
 	end: number
 	position: number
-	frames: string[]
-	onTrim(start: number, end: number): void
+	frames: TimelineFrames | null
+	onTrim(start: number, end: number, edge: 'start' | 'end'): void
 	onSeek(time: number): void
+	onFrames(from: number, span: number, count: number): void
 }) {
 	const [width, setWidth] = useState(1)
-	const latest = useRef({ duration, start, end, width, onTrim })
-	latest.current = { duration, start, end, width, onTrim }
+	const latest = useRef({
+		duration,
+		start,
+		end,
+		width,
+		onTrim,
+		onSeek,
+		onFrames,
+	})
+	latest.current = { duration, start, end, width, onTrim, onSeek, onFrames }
 	const origin = useRef(0)
 	const delta = useRef(0)
 	const baseline = useRef(0)
 	const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
 	const [zoom, setZoom] = useState<{ from: number; span: number } | null>(null)
 	const viewport = useRef(zoom)
+	useEffect(() => {
+		if (duration > 0 && width > 1)
+			latest.current.onFrames(
+				zoom?.from ?? 0,
+				zoom?.span ?? duration,
+				Math.min(16, Math.max(4, Math.ceil(width / 56))),
+			)
+	}, [zoom, width, duration])
 	function finish() {
 		clearTimeout(timer.current)
 		timer.current = undefined
@@ -37,30 +57,46 @@ export function Timeline({
 	}
 	useEffect(() => () => clearTimeout(timer.current), [])
 	function handle(edge: 'start' | 'end') {
+		let holdX = 0
+		let holdY = 0
+		function waitForHold() {
+			clearTimeout(timer.current)
+			timer.current = setTimeout(() => {
+				const current = latest.current
+				const next = precisionTrimWindow(current.duration, current[edge], edge)
+				origin.current = current[edge]
+				baseline.current = delta.current
+				viewport.current = next
+				setZoom(next)
+			}, 400)
+		}
 		return PanResponder.create({
 			onStartShouldSetPanResponder: () => true,
 			onMoveShouldSetPanResponder: () => true,
 			onPanResponderGrant: () => {
+				latest.current.onSeek(
+					edge === 'start'
+						? latest.current.start
+						: Math.max(latest.current.start, latest.current.end - 0.001),
+				)
 				origin.current = latest.current[edge]
 				delta.current = 0
 				baseline.current = 0
-				clearTimeout(timer.current)
-				timer.current = setTimeout(() => {
-					const current = latest.current
-					const next = precisionTrimWindow(
-						current.duration,
-						current[edge],
-						edge,
-					)
-					origin.current = current[edge]
-					baseline.current = delta.current
-					viewport.current = next
-					setZoom(next)
-				}, 400)
+				holdX = 0
+				holdY = 0
+				waitForHold()
 			},
 			onPanResponderMove: (_, gesture) => {
 				const current = latest.current
 				delta.current = gesture.dx
+				if (
+					!viewport.current &&
+					Math.hypot(gesture.dx - holdX, gesture.dy - holdY) > 2
+				) {
+					holdX = gesture.dx
+					holdY = gesture.dy
+					waitForHold()
+				}
 				const time = trimHandleTime(
 					origin.current,
 					gesture.dx - baseline.current,
@@ -72,11 +108,13 @@ export function Timeline({
 					current.onTrim(
 						Math.max(0, Math.min(time, current.end - gap)),
 						current.end,
+						edge,
 					)
 				else
 					current.onTrim(
 						current.start,
 						Math.min(current.duration, Math.max(time, current.start + gap)),
+						edge,
 					)
 			},
 			onPanResponderRelease: finish,
@@ -126,12 +164,16 @@ export function Timeline({
 							flexDirection: 'row',
 							position: 'absolute',
 							height: 56,
-							width: (width * duration) / (zoom?.span || duration || 1),
+							width:
+								(width * (frames?.span ?? duration)) /
+								(zoom?.span || duration || 1),
 							left:
-								(-(zoom?.from ?? 0) / (zoom?.span || duration || 1)) * width,
+								(((frames?.from ?? 0) - (zoom?.from ?? 0)) /
+									(zoom?.span || duration || 1)) *
+								width,
 						}}
 					>
-						{frames.map((uri, index) => (
+						{(frames?.images ?? []).map((uri, index) => (
 							<Image
 								key={index}
 								source={{ uri }}
@@ -212,6 +254,7 @@ export function Timeline({
 								onTrim(
 									Math.max(0, Math.min(time, end - Math.min(0.1, duration))),
 									end,
+									edge,
 								)
 							else
 								onTrim(
@@ -220,6 +263,7 @@ export function Timeline({
 										duration,
 										Math.max(time, start + Math.min(0.1, duration)),
 									),
+									edge,
 								)
 						}}
 						style={{

@@ -43,3 +43,14 @@ export async function prepareNativeEditor() {
 	) => Promise<unknown>
 	await configure('wolfie.media-utils.emojis', [emojis])
 }
+
+export async function finalizeEditedVideo(uri: string): Promise<string> {
+	const call = callNativeMethod as (
+		name: string,
+		args: unknown[],
+	) => Promise<unknown>
+	const result = await call('wolfie.media-utils.finalizeVideo', [uri])
+	if (typeof result !== 'string' || !result.startsWith('content://'))
+		throw new Error('Android could not finalize the edited video for upload.')
+	return result
+}

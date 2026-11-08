@@ -60,6 +60,10 @@ val mediaUtils = plugin {
             true
         }
         withAppContext { context -> fileContext = context }
+        registerNativeAsyncMethod("${manifest.id}.finalizeVideo") { args ->
+            val value = args.firstOrNull() as? String ?: error("Missing edited video URI.")
+            finalizeVideo(fileContext ?: error("Android file access is not ready."), value)
+        }
         registerNativeAsyncMethod("${manifest.id}.readMedia") { args ->
             val value = args.firstOrNull() as? String ?: error("Missing attachment URI.")
             val uri = Uri.parse(value)

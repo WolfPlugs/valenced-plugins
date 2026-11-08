@@ -12,7 +12,7 @@ import {
 } from './overlay-sheet'
 import { resolveWebView } from './webview'
 import type { ReactNode } from 'react'
-import type { EditorWebView, EmojiPicker } from './overlay-sheet'
+import type { EditorWebView, EmojiPicker } from './types'
 
 export function patchImageEditor(
 	cleanup: (callback: () => void) => void,

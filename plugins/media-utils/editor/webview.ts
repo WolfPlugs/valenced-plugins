@@ -10,7 +10,7 @@ import {
 	ReactNativeModuleId,
 } from '@valenced/react'
 import { codegenNativeCommands } from 'react-native'
-import type { EditorWebView } from './overlay-sheet'
+import type { EditorWebView } from './types'
 
 type WebView = EditorWebView & { isFileUploadSupported: unknown }
 export function resolveWebView(): EditorWebView | undefined {
