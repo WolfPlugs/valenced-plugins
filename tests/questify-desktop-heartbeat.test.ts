@@ -17,9 +17,25 @@ test('desktop heartbeats use the native sender and preserve terminal state', asy
 		)
 	}
 	expect(requests).toEqual([
-		['12345', '45678', false, 'test-session'],
-		['12345', '45678', true, 'test-session'],
+		['12345', '45678', false, 'test-session', undefined],
+		['12345', '45678', true, 'test-session', undefined],
 	])
+})
+
+test('activity heartbeats forward the stream key to the native sender', async () => {
+	let sent: unknown[] = []
+	await sendDesktopHeartbeat(
+		async (...args) => {
+			sent = args
+			return JSON.stringify({ status: 200, body: '{}' })
+		},
+		'12345',
+		'45678',
+		false,
+		'test-session',
+		'call:11111:1',
+	)
+	expect(sent[4]).toBe('call:11111:1')
 })
 
 test('native server rejection retains the HTTP status and Discord code', async () => {

@@ -5,7 +5,7 @@
 	"description": "Browse Discord quests, track progress, and auto-complete supported quests from their menus.",
 	"author": "Wolfie <347096063569559553> (https://wolfies.org/ \"Website\") (https://github.com/Wolfkid200444 \"GitHub\")",
 	"icon": "QuestsIcon",
-	"version": "1.0.1",
+	"version": "1.0.2",
 	"dependencies": {
 		"valenced.api": {
 			"version": ">=1 <2"

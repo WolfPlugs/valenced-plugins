@@ -16,6 +16,7 @@ import javax.net.ssl.HttpsURLConnection
 
 private const val DESKTOP_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) discord/1.0.9265 Chrome/148.0.7778.280 Electron/42.11.15 Safari/537.36"
 private val snowflake = Regex("[1-9][0-9]{4,19}")
+private val streamKeyPattern = Regex("call:[1-9][0-9]{4,19}:[1-9][0-9]{0,19}")
 
 val questify = plugin {
     val connections = ConcurrentHashMap.newKeySet<HttpsURLConnection>()
@@ -30,7 +31,9 @@ val questify = plugin {
             val applicationId = args.getOrNull(1) as? String ?: error("Missing application ID.")
             val terminal = args.getOrNull(2) as? Boolean ?: error("Missing terminal flag.")
             val token = args.getOrNull(3) as? String ?: error("Missing Discord session.")
+            val streamKey = args.getOrNull(4) as? String
             require(snowflake.matches(questId) && snowflake.matches(applicationId)) { "Invalid quest or application ID." }
+            require(streamKey == null || streamKeyPattern.matches(streamKey)) { "Invalid stream key." }
             require(token.isNotBlank() && token.length <= 4096 && token.none { it == '\r' || it == '\n' }) { "Invalid Discord session." }
             val properties = JSONObject()
                 .put("os", "Windows").put("browser", "Discord Client")
@@ -67,8 +70,10 @@ val questify = plugin {
                     setRequestProperty("Sec-Fetch-Mode", "cors")
                     setRequestProperty("Sec-Fetch-Dest", "empty")
                 }
-                val body = JSONObject().put("application_id", applicationId).put("terminal", terminal)
-                    .toString().toByteArray(Charsets.UTF_8)
+                // Activity quests are keyed by a voice-call stream key, desktop quests by application ID.
+                val body = JSONObject().apply {
+                    if (streamKey != null) put("stream_key", streamKey) else put("application_id", applicationId)
+                }.put("terminal", terminal).toString().toByteArray(Charsets.UTF_8)
                 connection.setFixedLengthStreamingMode(body.size)
                 connection.outputStream.use { it.write(body) }
                 val status = connection.responseCode
