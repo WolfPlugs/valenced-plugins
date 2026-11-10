@@ -1,9 +1,9 @@
 # WolfPlugs for Valenced
 
-Wolfie's plugins for Valenced. All ten plugins start at version `1.0.0`.
+Wolfie's plugins for Valenced.
 
 AddAttachments, Bot Client, Gif Text, Global Badges, MediaUtils, NSFW Blur,
-PetPet, Questify, and Sound Controls.
+PetPet, Questify, Server Info, and Sound Controls.
 
 ## Install
 
@@ -42,5 +42,7 @@ The release workflow can also be run manually. Published versions are kept for e
 ## Credits and license
 
 The plugins and repository tooling were ported from [WolfPlugs for Revenge](https://github.com/WolfPlugs/revenge-plugins), based on [Revenge Community Plugins](https://github.com/revenge-mod/revenge-community-plugins).
+
+Server Info is maintained from [Rosie's Valenced Plugins](https://code.is-your.app/SheWhoReignsSupreme/Valenced-Plugins).
 
 Licensed under [GPL-3.0](LICENSE). Original author and contributor attribution is preserved.
