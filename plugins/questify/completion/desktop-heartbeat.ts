@@ -5,6 +5,7 @@ export type NativeHeartbeat = (
 	applicationId: string,
 	terminal: boolean,
 	token: string,
+	streamKey?: string,
 ) => Promise<unknown>
 
 declare module '@valenced/modules/native' {
@@ -15,6 +16,7 @@ declare module '@valenced/modules/native' {
 				applicationId: string,
 				terminal: boolean,
 				token: string,
+				streamKey?: string,
 			],
 			string,
 		]
@@ -31,8 +33,9 @@ export async function sendDesktopHeartbeat(
 	applicationId: string,
 	terminal: boolean,
 	token: string,
+	streamKey?: string,
 ): Promise<void> {
-	const raw = await send(questId, applicationId, terminal, token)
+	const raw = await send(questId, applicationId, terminal, token, streamKey)
 	if (typeof raw !== 'string')
 		throw new Error('Questify native heartbeat returned an invalid response.')
 	const response: unknown = JSON.parse(raw)

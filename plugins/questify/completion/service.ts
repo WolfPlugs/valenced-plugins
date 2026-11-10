@@ -1,4 +1,5 @@
 import { Dispatcher } from '@valenced/discord/common/flux'
+import { Stores } from '@valenced/discord/flux'
 import { lookupModuleWithImportedPath } from '@valenced/discord/utils/modules/finders'
 import { lookupModule } from '@valenced/modules/finders'
 import { withProps } from '@valenced/modules/finders/filters'
@@ -42,6 +43,16 @@ function actions() {
 			'enrollInQuest',
 		),
 	)[0]
+}
+// Any voice channel works as the stream key target, same as the desktop quest scripts.
+function activityStreamKey(): string {
+	const channels = Stores.ChannelStore as
+		| { getSortedPrivateChannels?(): { id: string }[] }
+		| undefined
+	const id = channels?.getSortedPrivateChannels?.()[0]?.id
+	if (!id)
+		throw new Error('Open a DM or voice channel before starting this quest.')
+	return `call:${id}:1`
 }
 function wait(ms: number, signal: AbortSignal): Promise<void> {
 	return new Promise((resolve, reject) => {
@@ -115,7 +126,12 @@ export const completion = createCompletionController({
 	heartbeat: (questId, applicationId, terminal) =>
 		request(async () => {
 			const quest = readQuests().quests.find(quest => quest.id === questId)
-			if (quest?.tasks.some(task => task.name === 'PLAY_ON_DESKTOP')) {
+			const activity = quest?.tasks.some(task => task.name === 'PLAY_ACTIVITY')
+			// Native transport keeps a 401 from tripping Discord's client-side logout.
+			if (
+				activity ||
+				quest?.tasks.some(task => task.name === 'PLAY_ON_DESKTOP')
+			) {
 				const auth = lookupModuleWithImportedPath<{
 					default: { getToken(): string | null }
 				}>('stores/AuthenticationStore.tsx')[0]?.default
@@ -128,6 +144,7 @@ export const completion = createCompletionController({
 					applicationId,
 					terminal,
 					token,
+					activity ? activityStreamKey() : undefined,
 				)
 				await refreshQuests()
 				return
