@@ -1,0 +1,69 @@
+plugins/better-inbox/src/ui/confirmClear.tsx
+  s_e23ee3d522e293::t_bbb288d0a09cf7 1-51
+plugins/better-inbox/manifest.json
+  s_e23ee3d522e293::t_79cb36b662e313 8
+plugins/better-inbox/src/ui/MessageContent.tsx
+  s_e23ee3d522e293::t_22aa3530e37899 1-24
+plugins/better-inbox/src/ui/Settings.tsx
+  s_e23ee3d522e293::t_03439a9725244a 94
+  s_e23ee3d522e293::t_bbb288d0a09cf7 5,12,96
+plugins/better-inbox/src/lib/history.ts
+  s_e23ee3d522e293::t_bbb288d0a09cf7 22,26-27
+plugins/better-inbox/src/lib/types.ts
+  s_e23ee3d522e293::t_bbb288d0a09cf7 14,16-17,39
+tests/better-inbox.test.ts
+  s_e23ee3d522e293::t_6392f2330193be 101
+  s_e23ee3d522e293::t_314b85f04dae0d 72-77
+plugins/better-inbox/src/ui/CloseButton.tsx
+  s_e23ee3d522e293::t_22aa3530e37899 1-31
+tests/better-inbox-presentation.test.ts
+  s_e23ee3d522e293::t_78857846e85934 1-18
+tests/fixtures/better-inbox-presentation.cases.tsx
+  s_e23ee3d522e293::t_78857846e85934 1-108
+tests/better-inbox-confirmation.test.ts
+  s_e23ee3d522e293::t_314b85f04dae0d 1-18
+plugins/better-inbox/src/ui/NotificationCard.tsx
+  s_e23ee3d522e293::t_22aa3530e37899 9,49
+tests/better-inbox-category-limits.test.ts
+  s_e23ee3d522e293::t_03439a9725244a 1-113
+plugins/better-inbox/src/index.tsx
+  s_e23ee3d522e293::t_bbb288d0a09cf7 23
+plugins/better-inbox/src/ui/NotificationCenter.tsx
+  s_e23ee3d522e293::t_22aa3530e37899 68-76,98,119-121,141-153
+  s_e23ee3d522e293::t_bbb288d0a09cf7 3,27-28,127-130
+plugins/better-inbox/src/lib/historySync.ts
+  s_e23ee3d522e293::t_78857846e85934 98
+plugins/better-inbox/src/ui/openInbox.tsx
+  s_e23ee3d522e293::t_bbb288d0a09cf7 7,98
+  s_e23ee3d522e293::t_22aa3530e37899 6,24,38-39,51-53,66,74-75
+plugins/better-inbox/src/lib/inbox.ts
+  s_e23ee3d522e293::t_6392f2330193be 1,88-94,97-98,103-123,125,127-130,175-179
+  s_e23ee3d522e293::t_03439a9725244a 14-28,95-96,99-100,190,222-223,227-229
+  s_e23ee3d522e293::t_bbb288d0a09cf7 60,64,66,78-81,124,126,141-146,197-202,242-252,255-256
+  s_e23ee3d522e293::t_5adf6a44d0730c 102
+tests/fixtures/better-inbox-confirmation.cases.tsx
+  s_e23ee3d522e293::t_314b85f04dae0d 1-65
+tests/better-inbox-clear.test.ts
+  s_e23ee3d522e293::t_4c311e69258c97 22,25,67,77,112
+  s_e23ee3d522e293::t_314b85f04dae0d 1-21,23-24,26-66,68-76,78-111,113-144
+plugins/better-inbox/src/lib/tracking/shared.ts
+  s_e23ee3d522e293::t_bbb288d0a09cf7 18-19,21-25
+plugins/better-inbox/src/lib/markup.ts
+  s_e23ee3d522e293::t_22aa3530e37899 1-28
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "ca0ae56a71c2bf38f8da589cb64511f4e1bd26ee",
+  "prompts": {},
+  "sessions": {
+    "s_e23ee3d522e293": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1c64b-5fb5-7051-9d80-ddd9451971f6",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Wolfkid200444 <32025746+Wolfkid200444@users.noreply.github.com>"
+    }
+  }
+}
