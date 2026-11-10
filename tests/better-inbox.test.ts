@@ -69,7 +69,12 @@ describe('BetterInbox history', () => {
 		expect(inbox.getSnapshot().map(item => item.id)).toEqual(['three', 'two'])
 		await inbox.stop()
 		expect(saved).toEqual([
-			{ owner: 'alice', dismissed: [], notifications: inbox.getSnapshot() },
+			{
+				owner: 'alice',
+				dismissed: [],
+				clearedAt: {},
+				notifications: inbox.getSnapshot(),
+			},
 		])
 	})
 	test('clears one category and deletes an item without removing other categories', async () => {
@@ -93,6 +98,7 @@ describe('BetterInbox history', () => {
 			{
 				owner: 'bob',
 				dismissed: [],
+				clearedAt: {},
 				notifications: [notification('bob-message')],
 			},
 		])

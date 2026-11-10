@@ -95,7 +95,7 @@ export function installHistorySync(
 			if (result.status === 'rejected') controller.reportError(result.reason)
 		if (results.some(result => result.status === 'rejected'))
 			throw new Error(
-				'Some notification history could not be loaded. Please try refreshing.',
+				'Some notification history could not be loaded. Close and reopen the inbox to retry.',
 			)
 	}
 	function refresh(): Promise<void> {

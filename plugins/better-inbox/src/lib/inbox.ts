@@ -1,3 +1,4 @@
+import { snapshotAuthor } from './tracking/shared'
 import type {
 	BetterInboxStorage,
 	NotificationCategory,
@@ -8,6 +9,21 @@ export function storageLimit(value: unknown): number {
 	return typeof value === 'number' && Number.isFinite(value)
 		? Math.max(1, Math.min(1000, Math.floor(value)))
 		: 300
+}
+
+// Categories have separate limits so a busy mentions feed cannot evict Friends.
+export function limitNotifications(
+	items: NotificationItem[],
+	maximum: unknown,
+): NotificationItem[] {
+	const limit = storageLimit(maximum)
+	const counts = new Map<NotificationCategory, number>()
+	return items.filter(item => {
+		const count = counts.get(item.category) ?? 0
+		if (count >= limit) return false
+		counts.set(item.category, count + 1)
+		return true
+	})
 }
 
 export function isNotification(value: unknown): value is NotificationItem {
@@ -41,14 +57,13 @@ export function isNotification(value: unknown): value is NotificationItem {
 				typeof item.author === 'object' &&
 				typeof item.author.id === 'string' &&
 				typeof item.author.username === 'string' &&
-				(item.author.globalName === undefined ||
+				(item.author.globalName == null ||
 					typeof item.author.globalName === 'string') &&
 				(item.author.avatar == null ||
 					typeof item.author.avatar === 'string') &&
-				(item.author.discriminator === undefined ||
+				(item.author.discriminator == null ||
 					typeof item.author.discriminator === 'string') &&
-				(item.author.bot === undefined ||
-					typeof item.author.bot === 'boolean')))
+				(item.author.bot == null || typeof item.author.bot === 'boolean')))
 	)
 }
 
@@ -60,30 +75,59 @@ export function createInbox({
 }: {
 	read: () => BetterInboxStorage | undefined
 	save: (
-		state: Pick<BetterInboxStorage, 'notifications' | 'owner' | 'dismissed'>,
+		state: Pick<
+			BetterInboxStorage,
+			'notifications' | 'owner' | 'dismissed' | 'clearedAt'
+		>,
 	) => Promise<void>
 	reportError: (error: unknown) => void
 	owner: string | undefined
 }) {
 	const listeners = new Set<() => void>()
 	const initial = read()
-	// Unowned history cannot safely be assigned to the current account.
-	let items =
-		initial &&
-		initial.owner === owner &&
-		owner &&
-		Array.isArray(initial.notifications)
-			? initial.notifications
-					.filter(isNotification)
-					.slice(0, storageLimit(initial.maxStored))
-			: []
-	let dismissed = new Set<string>(
-		initial?.owner === owner && Array.isArray(initial?.dismissed)
-			? initial.dismissed.filter(
-					(id: unknown): id is string => typeof id === 'string',
+	// Discord may identify the account after plugins start. Keep the saved
+	// snapshot private until its owner is confirmed instead of discarding it.
+	let waitingForOwner = owner === undefined
+	function restore(nextOwner: string | undefined) {
+		const owned =
+			nextOwner && initial?.owner === nextOwner ? initial : undefined
+		const restoredItems = Array.isArray(owned?.notifications)
+			? limitNotifications(
+					owned.notifications.filter(isNotification).map(item => ({
+						...item,
+						author: item.author ? snapshotAuthor(item.author) : undefined,
+					})),
+					owned.maxStored,
 				)
-			: [],
-	)
+			: []
+		const restoredDismissed = new Set<string>(
+			Array.isArray(owned?.dismissed)
+				? owned.dismissed.filter(
+						(id: unknown): id is string => typeof id === 'string',
+					)
+				: [],
+		)
+		const restoredClearedAt: Partial<Record<NotificationCategory, number>> = {}
+		if (owned?.clearedAt && typeof owned.clearedAt === 'object') {
+			for (const category of [
+				'mentions',
+				'replies',
+				'reactions',
+				'friend_request',
+				'thread',
+				'other',
+			] as const) {
+				const time = owned.clearedAt[category]
+				if (typeof time === 'number' && Number.isFinite(time))
+					restoredClearedAt[category] = time
+			}
+		}
+		return { restoredItems, restoredDismissed, restoredClearedAt }
+	}
+	const restored = restore(owner)
+	let items: NotificationItem[] = restored.restoredItems
+	let dismissed = restored.restoredDismissed
+	let clearedAt = restored.restoredClearedAt
 	let timer: ReturnType<typeof setTimeout> | undefined
 	let active = true
 	let dirty = false
@@ -94,7 +138,12 @@ export function createInbox({
 		timer = undefined
 		if (!dirty) return writes
 		dirty = false
-		const state = { notifications: items, owner, dismissed: [...dismissed] }
+		const state = {
+			notifications: items,
+			owner,
+			dismissed: [...dismissed],
+			clearedAt: { ...clearedAt },
+		}
 		writes = writes.then(() => save(state)).catch(reportError)
 		return writes
 	}
@@ -123,8 +172,11 @@ export function createInbox({
 		setOwner(next: string | undefined) {
 			if (!active || owner === next) return
 			owner = next
-			dismissed = new Set()
-			items = []
+			const restored = waitingForOwner ? restore(next) : undefined
+			if (next !== undefined) waitingForOwner = false
+			dismissed = restored?.restoredDismissed ?? new Set()
+			clearedAt = restored?.restoredClearedAt ?? {}
+			items = restored?.restoredItems ?? []
 			changed()
 		},
 		push(item: NotificationItem) {
@@ -135,14 +187,19 @@ export function createInbox({
 				items.some(existing => existing.id === item.id)
 			)
 				return
-			items = [item, ...items].slice(0, storageLimit(read()?.maxStored))
+			items = limitNotifications([item, ...items], read()?.maxStored)
 			changed()
 		},
 		importHistory(history: NotificationItem[]) {
 			if (!active || !owner) return
 			const merged = new Map(items.map(item => [item.id, item]))
 			for (const item of history) {
-				if (dismissed.has(item.id)) continue
+				if (
+					dismissed.has(item.id) ||
+					(clearedAt[item.category] !== undefined &&
+						(item.createdAt ?? 0) <= clearedAt[item.category]!)
+				)
+					continue
 				const existing = merged.get(item.id)
 				// A native reply notification has stronger classification than a
 				// recent-mentions record whose referenced message is unavailable.
@@ -162,13 +219,14 @@ export function createInbox({
 						: next,
 				)
 			}
-			const next = [...merged.values()]
-				.sort(
+			const next = limitNotifications(
+				[...merged.values()].sort(
 					(a, b) =>
 						(b.createdAt ?? Number.MAX_SAFE_INTEGER) -
 						(a.createdAt ?? Number.MAX_SAFE_INTEGER),
-				)
-				.slice(0, storageLimit(read()?.maxStored))
+				),
+				read()?.maxStored,
+			)
 			if (
 				next.length === items.length &&
 				next.every((item, index) => item === items[index])
@@ -181,8 +239,21 @@ export function createInbox({
 			if (!active) return
 			for (const item of items)
 				if (!category || item.category === category) dismissed.add(item.id)
+			const now = Date.now()
+			for (const key of [
+				'mentions',
+				'replies',
+				'reactions',
+				'friend_request',
+				'thread',
+				'other',
+			] as const) {
+				if (!category || key === category) clearedAt[key] = now
+			}
 			items = category ? items.filter(item => item.category !== category) : []
 			changed()
+			// A process exit does not run plugin cleanup. Persist explicit clears now.
+			void persist()
 		},
 		delete(id: string) {
 			if (!active) return

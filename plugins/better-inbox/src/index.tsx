@@ -20,7 +20,7 @@ export default plugin<{ jsonStorage: BetterInboxStorage }>({
 		const reportError = (error: unknown) => plugin.reportError(error)
 		const inbox = createInbox({
 			read: () => jsonStorage.cache,
-			save: state => jsonStorage.set(state),
+			save: state => jsonStorage.set({ ...jsonStorage.cache, ...state }, true),
 			reportError,
 			owner: getOwner(),
 		})

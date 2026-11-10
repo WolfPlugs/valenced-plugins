@@ -15,10 +15,14 @@ export function snapshotAuthor(author: NotificationAuthor): NotificationAuthor {
 	return {
 		id: author.id,
 		username: author.username,
-		globalName: author.globalName,
+		globalName:
+			typeof author.globalName === 'string' ? author.globalName : undefined,
 		avatar: author.avatar,
-		discriminator: author.discriminator,
-		bot: author.bot,
+		discriminator:
+			typeof author.discriminator === 'string'
+				? author.discriminator
+				: undefined,
+		bot: author.bot === true,
 	}
 }
 export function timestamp() {

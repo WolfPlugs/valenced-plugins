@@ -2,13 +2,14 @@ import { Page } from '@valenced/components'
 import { Design } from '@valenced/discord/design'
 import { React, ReactNative } from '@valenced/react'
 import { DEFAULT_STORAGE } from '../lib/types'
+import { confirmClear } from './confirmClear'
 import { useInbox } from './context'
 import { openNotificationCenter } from './openInbox'
 import type { BetterInboxStorage } from '../lib/types'
 
 type ToggleKey = Exclude<
 	keyof BetterInboxStorage,
-	'notifications' | 'maxStored' | 'owner' | 'dismissed'
+	'notifications' | 'maxStored' | 'owner' | 'dismissed' | 'clearedAt'
 >
 const Tracking: { key: ToggleKey; label: string; description: string }[] = [
 	{
@@ -90,9 +91,9 @@ export default function Settings() {
 					<TableRowGroup title="Storage">
 						<TableRow
 							label="Clear all notifications"
-							subLabel={`${items.length} notifications stored on this device`}
+							subLabel={`${items.length} notifications stored on this device. Each category keeps its own history limit.`}
 							variant="danger"
-							onPress={() => inbox.clear()}
+							onPress={() => confirmClear(controller)}
 						/>
 					</TableRowGroup>
 				</Stack>

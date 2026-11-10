@@ -11,10 +11,10 @@ export type MentionSubCategory = 'all' | 'people' | 'role' | 'bot'
 export interface NotificationAuthor {
 	id: string
 	username: string
-	globalName?: string
+	globalName?: string | null
 	avatar?: string | null
-	discriminator?: string
-	bot?: boolean
+	discriminator?: string | null
+	bot?: boolean | null
 }
 
 export interface NotificationItem {
@@ -36,6 +36,7 @@ export interface NotificationItem {
 export interface BetterInboxStorage {
 	owner?: string
 	dismissed?: string[]
+	clearedAt?: Partial<Record<NotificationCategory, number>>
 
 	showYouBarButton?: boolean
 	notifications?: NotificationItem[]

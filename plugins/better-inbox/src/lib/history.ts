@@ -19,12 +19,12 @@ function author(
 	stores: InboxStores,
 ): NotificationAuthor | undefined {
 	const raw = record(value)
-	const id = text(raw?.id)
+	const id = text(value) ?? text(raw?.id)
 	if (!id) return
 	const user = stores.UserStore?.getUser(id)
 	if (user) return snapshotAuthor(user)
-	const username = text(raw?.username)
-	if (!username) return
+	const username =
+		text(raw?.username) ?? text(raw?.global_name) ?? 'Unknown user'
 	return {
 		id,
 		username,

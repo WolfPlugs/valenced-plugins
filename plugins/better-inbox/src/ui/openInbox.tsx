@@ -3,6 +3,8 @@ import { ActionSheetActionCreators } from '@valenced/discord/actions'
 import { Design } from '@valenced/discord/design'
 import { lookupModule } from '@valenced/modules/finders'
 import { withProps } from '@valenced/modules/finders/filters'
+import { CloseButton } from './CloseButton'
+import { dismissClearConfirmation } from './confirmClear'
 import { InboxContext } from './context'
 import { NotificationActionsKey, InboxSheetKey as SheetKey } from './keys'
 import NotificationCenter from './NotificationCenter'
@@ -19,7 +21,7 @@ interface NavigatorProps {
 	goBackOnBackPress: boolean
 	screens: Record<
 		string,
-		{ title: string; headerLeft?: ReactNode; render(): ReactNode }
+		{ title: string; headerLeft?: () => ReactNode; render(): ReactNode }
 	>
 }
 
@@ -33,9 +35,8 @@ export function openNotificationCenter(controller: InboxController) {
 		)
 		const [header] = lookupModule(
 			withProps<{
-				getRenderCloseButton: unknown
-				getHeaderCloseButton(close: () => void): ReactNode
-			}>('getHeaderCloseButton', 'getRenderCloseButton'),
+				getHeaderCloseButton(close: () => void): () => ReactNode
+			}>('getHeaderCloseButton'),
 		)
 		if (navigation && navigator?.Navigator) {
 			const { Navigator } = navigator
@@ -47,9 +48,9 @@ export function openNotificationCenter(controller: InboxController) {
 						screens={{
 							BetterInbox: {
 								title: 'Inbox',
-								headerLeft: header?.getHeaderCloseButton(() =>
-									navigation.pop(),
-								),
+								headerLeft:
+									header?.getHeaderCloseButton(() => navigation.pop()) ??
+									(() => <CloseButton onPress={() => navigation.pop()} />),
 								render: () => (
 									<Page>
 										<NotificationCenter />
@@ -62,7 +63,7 @@ export function openNotificationCenter(controller: InboxController) {
 			))
 			return
 		}
-		const { ActionSheet, BottomSheetTitleHeader, Button } = Design
+		const { ActionSheet, BottomSheetTitleHeader } = Design
 		const Sheet = () => (
 			<InboxContext.Provider value={controller}>
 				<ActionSheet
@@ -70,11 +71,8 @@ export function openNotificationCenter(controller: InboxController) {
 					header={
 						<BottomSheetTitleHeader
 							title="Inbox"
-							trailing={
-								<Button
-									text="Close"
-									size="sm"
-									variant="tertiary"
+							leading={
+								<CloseButton
 									onPress={() =>
 										ActionSheetActionCreators.hideActionSheet(SheetKey)
 									}
@@ -97,6 +95,7 @@ export function openNotificationCenter(controller: InboxController) {
 	}
 }
 export function closeInboxSheets() {
+	dismissClearConfirmation()
 	ActionSheetActionCreators.hideActionSheet(SheetKey)
 	ActionSheetActionCreators.hideActionSheet(NotificationActionsKey)
 }

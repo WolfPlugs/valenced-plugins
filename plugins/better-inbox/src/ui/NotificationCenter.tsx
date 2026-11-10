@@ -1,5 +1,6 @@
 import { Design } from '@valenced/discord/design'
 import { React, ReactNative } from '@valenced/react'
+import { confirmClear } from './confirmClear'
 import { useInbox } from './context'
 import { NotificationCard } from './NotificationCard'
 import type { MentionSubCategory, NotificationCategory } from '../lib/types'
@@ -23,7 +24,8 @@ const Categories: NotificationCategory[] = [
 const MentionFilters: MentionSubCategory[] = ['all', 'people', 'role', 'bot']
 
 export default function NotificationCenter() {
-	const { inbox, refreshHistory } = useInbox()
+	const controller = useInbox()
+	const { inbox, refreshHistory } = controller
 	const [loading, setLoading] = React.useState(false)
 	const [loadError, setLoadError] = React.useState<string>()
 	const refresh = React.useCallback(async () => {
@@ -63,23 +65,15 @@ export default function NotificationCenter() {
 		counts.set(item.category, (counts.get(item.category) ?? 0) + 1)
 	return (
 		<View style={{ flex: 1, minHeight: 300 }}>
-			<View style={{ paddingHorizontal: 12, paddingTop: 8 }}>
-				<Button
-					text={loading ? 'Syncing notifications…' : 'Refresh notifications'}
-					loading={loading}
-					disabled={loading}
-					size="sm"
-					variant="tertiary"
-					onPress={() => {
-						void refresh()
-					}}
-				/>
-				{loadError && (
-					<Text variant="text-sm/normal" color="text-muted">
-						{loadError}
-					</Text>
-				)}
-			</View>
+			{loadError && (
+				<Text
+					variant="text-sm/normal"
+					color="text-muted"
+					style={{ paddingHorizontal: 12, paddingTop: 8 }}
+				>
+					{loadError}
+				</Text>
+			)}
 			<ScrollView
 				horizontal
 				showsHorizontalScrollIndicator={false}
@@ -101,7 +95,7 @@ export default function NotificationCenter() {
 				<ScrollView
 					horizontal
 					showsHorizontalScrollIndicator={false}
-					style={{ flexGrow: 0 }}
+					style={{ flexGrow: 0, marginBottom: 16 }}
 					contentContainerStyle={{
 						paddingHorizontal: 12,
 						paddingBottom: 8,
@@ -122,13 +116,18 @@ export default function NotificationCenter() {
 			)}
 			{(category === 'all' ? items.length : (counts.get(category) ?? 0)) >
 				0 && (
-				<View style={{ paddingHorizontal: 12, paddingBottom: 8 }}>
+				<View
+					style={{ paddingHorizontal: 12, paddingTop: 8, paddingBottom: 12 }}
+				>
 					<Button
 						text={`Clear ${category === 'all' ? 'all' : CategoryLabels[category]}`}
 						variant="tertiary"
 						size="sm"
 						onPress={() =>
-							inbox.clear(category === 'all' ? undefined : category)
+							confirmClear(
+								controller,
+								category === 'all' ? undefined : category,
+							)
 						}
 					/>
 				</View>
@@ -139,15 +138,19 @@ export default function NotificationCenter() {
 				contentContainerStyle={{ padding: 12, paddingBottom: 40, gap: 8 }}
 				renderItem={({ item }) => <NotificationCard item={item} />}
 				ListEmptyComponent={
-					<Text
-						variant="text-md/normal"
-						color="text-muted"
-						style={{ padding: 32, textAlign: 'center' }}
-					>
-						{category === 'all'
-							? 'No notifications found.'
-							: `No ${CategoryLabels[category].toLowerCase()} notifications found.`}
-					</Text>
+					loading ? (
+						<ReactNative.ActivityIndicator style={{ padding: 32 }} />
+					) : (
+						<Text
+							variant="text-md/normal"
+							color="text-muted"
+							style={{ padding: 32, textAlign: 'center' }}
+						>
+							{category === 'all'
+								? 'No notifications found.'
+								: `No ${CategoryLabels[category].toLowerCase()} notifications found.`}
+						</Text>
+					)
 				}
 			/>
 		</View>

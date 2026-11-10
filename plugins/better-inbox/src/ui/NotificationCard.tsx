@@ -6,6 +6,7 @@ import {
 	openUserProfile,
 } from '../lib/navigation'
 import { useInbox } from './context'
+import { MessageContent } from './MessageContent'
 import { openNotificationContextMenu } from './NotificationContextMenu'
 import type { NotificationItem } from '../lib/types'
 
@@ -45,11 +46,7 @@ export function NotificationCard({ item }: { item: NotificationItem }) {
 					{item.timestamp}
 				</Text>
 			</View>
-			{Boolean(item.content) && (
-				<Text variant="text-sm/normal" numberOfLines={2}>
-					{item.content}
-				</Text>
-			)}
+			{Boolean(item.content) && <MessageContent item={item} />}
 			{Boolean(location) && (
 				<Text variant="text-xs/normal" color="text-muted">
 					{location}
