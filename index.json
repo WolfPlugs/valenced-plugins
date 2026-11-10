@@ -27,6 +27,33 @@
         }
       }
     },
+    "wolfie.better-devices": {
+      "name": "Better Devices",
+      "description": "Better session control: multi-select logout, new-device alerts, and clearer device details.",
+      "author": "Rosie, kmmiio99o",
+      "contributors": [
+        "Wolfie <347096063569559553> (https://wolfies.org/ \"Website\") (https://github.com/Wolfkid200444 \"GitHub\")"
+      ],
+      "icon": "LaptopPhoneIcon",
+      "channels": {
+        "latest": "1.0.0"
+      },
+      "versions": {
+        "1.0.0": {
+          "url": "https://plugins.obamabot.me/valenced-plugins/pool/wolfie.better-devices@1.0.0.zip",
+          "sha256": "1d7ff7b761e81f29fdc3bfa4ae70c81f75a0a08de7c246faadc41d5e0f3954ac",
+          "size": 4943,
+          "dependencies": {
+            "valenced.api": {
+              "version": ">=1 <2"
+            },
+            "discord": {
+              "version": "*"
+            }
+          }
+        }
+      }
+    },
     "wolfie.bot-client": {
       "name": "Bot Client",
       "description": "Recommended to use a different client for this",
