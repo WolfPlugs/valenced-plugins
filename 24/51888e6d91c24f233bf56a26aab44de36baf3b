@@ -1,0 +1,58 @@
+README.md
+  s_9b2919890747b5::t_9198856ad44fe6 3,6,46
+  s_9b2919890747b5::t_a261c0940321e8 47
+plugins/server-info/manifest.json
+  s_9b2919890747b5::t_9198856ad44fe6 1-23
+plugins/server-info/tsconfig.json
+  s_9b2919890747b5::t_d2c747156a9da9 1-4
+tests/fixtures/server-info-profile.cases.ts
+  s_9b2919890747b5::t_d2c747156a9da9 1-114
+tests/server-info-profile.test.ts
+  s_9b2919890747b5::t_02fa7f615a1bb6 1-16
+plugins/server-info/src/index.ts
+  s_9b2919890747b5::t_f7bb66a16e5fd3 1-21
+plugins/server-info/src/lib/contextMenu.tsx
+  s_9b2919890747b5::t_b8ec3aff16642b 1-38
+plugins/server-info/src/lib/guildMenu.ts
+  s_9b2919890747b5::t_0e9d2283d578af 1-32
+plugins/server-info/src/lib/modules.ts
+  s_9b2919890747b5::t_9223b02af77af2 1-147
+plugins/server-info/src/lib/profile.ts
+  s_9b2919890747b5::t_1d8df00a405529 1-58
+plugins/server-info/src/ui/FriendsRows.tsx
+  s_9b2919890747b5::t_fd6ff4c320e43e 1-77
+plugins/server-info/src/ui/OverviewRows.tsx
+  s_9b2919890747b5::t_38dc9cbce33af7 1-48
+plugins/server-info/src/ui/ServerBanner.tsx
+  s_9b2919890747b5::t_03c3d09c4cf5ed 1-40
+plugins/server-info/src/ui/ServerHeader.tsx
+  s_9b2919890747b5::t_a4c6912702ebd8 1-45
+plugins/server-info/src/ui/ServerInfoSheet.tsx
+  s_9b2919890747b5::t_01fa6b4adf4a7c 1-148
+plugins/server-info/src/ui/ServerRows.tsx
+  s_9b2919890747b5::t_715fe601a9960b 1-71
+plugins/server-info/src/ui/format.ts
+  s_9b2919890747b5::t_a996864837803c 1-2
+plugins/server-info/src/ui/openServerInfoSheet.ts
+  s_9b2919890747b5::t_d50e7fea1f84a8 1-17
+plugins/server-info/src/ui/useGuildInfo.ts
+  s_9b2919890747b5::t_3a6b973d20b993 1-259
+tests/server-info.test.ts
+  s_9b2919890747b5::t_d481dca486ab89 1-135
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "2451888e6d91c24f233bf56a26aab44de36baf3b",
+  "prompts": {},
+  "sessions": {
+    "s_9b2919890747b5": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1c36d-a12b-7921-99c6-5d5a97171b1a",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Wolfkid200444 <32025746+Wolfkid200444@users.noreply.github.com>"
+    }
+  }
+}
