@@ -1,0 +1,19 @@
+plugins/server-info/manifest.json
+  s_9b2919890747b5::t_7fb2a5d1440bf3 3
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "533a99c5989328cf51813f38259cc34b40a5315a",
+  "prompts": {},
+  "sessions": {
+    "s_9b2919890747b5": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1c36d-a12b-7921-99c6-5d5a97171b1a",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Wolfkid200444 <32025746+Wolfkid200444@users.noreply.github.com>"
+    }
+  }
+}
