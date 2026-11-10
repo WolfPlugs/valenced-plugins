@@ -1,0 +1,23 @@
+{
+	"format": 1,
+	"id": "wolfie.better-inbox",
+	"name": "BetterInbox",
+	"description": "Categorizes Discord notifications into clean tabs with filters for mentions, replies, reactions, and threads.",
+	"author": "Rosie",
+	"icon": "BellIcon",
+	"version": "1.0.0",
+	"dependencies": {
+		"valenced.api": {
+			"version": ">=1 <2"
+		},
+		"discord": {
+			"version": "*"
+		}
+	},
+	"dist": {
+		"script": "index.js"
+	},
+	"contributors": [
+		"Wolfie <347096063569559553> (https://wolfies.org/ \"Website\") (https://github.com/Wolfkid200444 \"GitHub\")"
+	]
+}
