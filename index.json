@@ -307,6 +307,33 @@
         }
       }
     },
+    "wolfie.server-info": {
+      "name": "Server Info",
+      "description": "View server information from the guild context menu.",
+      "author": "Rosie, kmmiio99o",
+      "contributors": [
+        "Wolfie <347096063569559553> (https://wolfies.org/ \"Website\") (https://github.com/Wolfkid200444 \"GitHub\")"
+      ],
+      "icon": "CircleInformationIcon",
+      "channels": {
+        "latest": "1.0.0"
+      },
+      "versions": {
+        "1.0.0": {
+          "url": "https://plugins.obamabot.me/valenced-plugins/pool/wolfie.server-info@1.0.0.zip",
+          "sha256": "dbc98ad4d6c7d6ebfcf2d36c72b769e571572c458250c46c47d115ed8ad65043",
+          "size": 4822,
+          "dependencies": {
+            "valenced.api": {
+              "version": ">=1 <2"
+            },
+            "discord": {
+              "version": "*"
+            }
+          }
+        }
+      }
+    },
     "wolfie.sound-controls": {
       "name": "Sound Controls",
       "description": "Mute individual call effects, ringtones, and in-app notification sounds.",
