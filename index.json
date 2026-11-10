@@ -54,6 +54,33 @@
         }
       }
     },
+    "wolfie.better-inbox": {
+      "name": "BetterInbox",
+      "description": "Categorizes Discord notifications into clean tabs with filters for mentions, replies, reactions, and threads.",
+      "author": "Rosie",
+      "contributors": [
+        "Wolfie <347096063569559553> (https://wolfies.org/ \"Website\") (https://github.com/Wolfkid200444 \"GitHub\")"
+      ],
+      "icon": "BellIcon",
+      "channels": {
+        "latest": "1.0.0"
+      },
+      "versions": {
+        "1.0.0": {
+          "url": "https://plugins.obamabot.me/valenced-plugins/pool/wolfie.better-inbox@1.0.0.zip",
+          "sha256": "8d7accdf5e3195e05411f5c0cda220a5fd9bf9e745c7b930b74757cc9b8a59a0",
+          "size": 9374,
+          "dependencies": {
+            "valenced.api": {
+              "version": ">=1 <2"
+            },
+            "discord": {
+              "version": "*"
+            }
+          }
+        }
+      }
+    },
     "wolfie.bot-client": {
       "name": "Bot Client",
       "description": "Recommended to use a different client for this",
