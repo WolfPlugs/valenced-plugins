@@ -4,6 +4,9 @@
 	"name": "Questify",
 	"description": "Browse Discord quests, track progress, and auto-complete supported quests from their menus.",
 	"author": "Wolfie <347096063569559553> (https://wolfies.org/ \"Website\") (https://github.com/Wolfkid200444 \"GitHub\")",
+	"contributors": [
+		"dxckiee <772390964471791630>"
+	],
 	"icon": "QuestsIcon",
 	"version": "1.0.2",
 	"dependencies": {
