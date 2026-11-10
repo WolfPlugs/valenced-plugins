@@ -50,7 +50,8 @@ function activityStreamKey(): string {
 		| { getSortedPrivateChannels?(): { id: string }[] }
 		| undefined
 	const id = channels?.getSortedPrivateChannels?.()[0]?.id
-	if (!id) throw new Error('Open a DM or voice channel before starting this quest.')
+	if (!id)
+		throw new Error('Open a DM or voice channel before starting this quest.')
 	return `call:${id}:1`
 }
 function wait(ms: number, signal: AbortSignal): Promise<void> {
