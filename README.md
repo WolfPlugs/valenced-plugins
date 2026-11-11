@@ -2,7 +2,7 @@
 
 Wolfie's plugins for Valenced.
 
-AddAttachments, Better Devices, BetterInbox, Bot Client, Gif Text, Global Badges, MediaUtils, NSFW Blur,
+AddAttachments, Better Devices, BetterInbox, Bot Client, Gif Text, Global Badges, MediaUtils, More Alts!, NSFW Blur,
 PetPet, Questify, Server Info, and Sound Controls.
 
 ## Install
