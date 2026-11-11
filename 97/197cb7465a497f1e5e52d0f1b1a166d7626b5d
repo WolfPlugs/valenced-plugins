@@ -1,0 +1,41 @@
+README.md
+  s_4edf9f098286f5::t_f1acaacb15935a 5
+plugins/more-alts/js/index.ts
+  s_4edf9f098286f5::t_8a73961c4aea64 1-64
+plugins/more-alts/js/lib/accountActions.ts
+  s_4edf9f098286f5::t_5f93097fff3a0a 1-519
+plugins/more-alts/js/lib/passwordUtils.ts
+  s_4edf9f098286f5::t_f7073a9893a89d 1-10
+plugins/more-alts/js/lib/types.ts
+  s_4edf9f098286f5::t_38f5c0cf453156 1-36
+plugins/more-alts/js/patches/nativeSwitcher.ts
+  s_4edf9f098286f5::t_e10db1e8f39af2 1-240
+plugins/more-alts/js/patches/tabBarLongPress.tsx
+  s_4edf9f098286f5::t_f7a0f863829908 1-135
+plugins/more-alts/js/ui/AccountSwitcherSheet.tsx
+  s_4edf9f098286f5::t_0dae79f8d04b4a 1-195
+plugins/more-alts/js/ui/AddAccountSheet.tsx
+  s_4edf9f098286f5::t_a70155f65cbf9f 1-246
+plugins/more-alts/js/ui/Settings.tsx
+  s_4edf9f098286f5::t_a153e2e81d166f 1-376
+plugins/more-alts/manifest.json
+  s_4edf9f098286f5::t_376b81fb8ee63b 1-27
+plugins/more-alts/src/main/kotlin/rosie/morealts/MoreAltsPlugin.kt
+  s_4edf9f098286f5::t_04f74e8ade738e 1-105
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "97197cb7465a497f1e5e52d0f1b1a166d7626b5d",
+  "prompts": {},
+  "sessions": {
+    "s_4edf9f098286f5": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1c82a-34b1-71d3-b479-96f0144c93a0",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Wolfkid200444 <32025746+Wolfkid200444@users.noreply.github.com>"
+    }
+  }
+}
