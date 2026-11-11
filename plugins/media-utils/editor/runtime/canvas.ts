@@ -1,7 +1,16 @@
 import { moveCrop } from '../shared/crop-geometry'
 import { drawAdjusted } from '../shared/draw-adjusted'
+import {
+	drawLayerSelection,
+	layerContains,
+	layerSelection,
+} from './layer-selection'
+import { createInkRenderer, drawText, textLayout } from './markup'
 import type { CanvasCommand } from '../protocol'
 import type { CropBox, CropDrag, Point } from '../shared/crop-geometry'
+import type { Brush, TextStyle } from '../shared/markup'
+import type { LayerTransform } from './layer-selection'
+import type { Stroke } from './markup'
 
 declare global {
 	interface Window {
@@ -24,6 +33,11 @@ function runtime() {
 	let kind: 'image' | 'video' = 'image'
 	let width = 1
 	let height = 1
+	let stageWidth = 1
+	let stageHeight = 1
+	const previewBase = document.createElement('canvas')
+	let previewSource: HTMLImageElement | undefined
+	let previewTransform = ''
 	let rotation = 0
 	let flipped = false
 	let straighten = 0,
@@ -40,7 +54,8 @@ function runtime() {
 	let cropBox: CropBox | undefined
 	let cropDrag: CropDrag | undefined
 	let color = '#ffffff'
-	let size = 24
+	let size = 8
+	let brush: Brush = 'pen'
 	let exporting = false
 	let recorder: MediaRecorder | undefined
 	let seekingPreview = false
@@ -101,27 +116,28 @@ function runtime() {
 				'This audio format cannot be opened. Choose an MP3, AAC, M4A, WAV, or Ogg file.',
 		})
 	}
-	type Layer =
-		| {
-				kind: 'text'
-				text: string
-				color: string
-				size: number
-				x: number
-				y: number
-		  }
-		| {
-				kind: 'emoji'
-				image: HTMLImageElement
-				size: number
-				x: number
-				y: number
-		  }
-		| { kind: 'ink'; points: Point[]; color: string; size: number }
+	type Layer = LayerTransform &
+		(
+			| { kind: 'text'; text: string; style: TextStyle; size: number }
+			| { kind: 'emoji'; image: HTMLImageElement; size: number }
+		)
 	const layers: Layer[] = []
-	let selected: Exclude<Layer, { kind: 'ink' }> | undefined
-	let stroke: Extract<Layer, { kind: 'ink' }> | undefined
+	const ink: Stroke[] = []
+	const redoInk: Stroke[] = []
+	const drawInk = createInkRenderer()
+	let selected: Layer | undefined
+	let layerDrag:
+		| {
+				action: 'move' | 'resize' | 'rotate'
+				distance: number
+				angle: number
+				scale: number
+		  }
+		| undefined
+	let stroke: Stroke | undefined
 	let last: Point | undefined
+	let pointer: number | undefined
+	let pendingDraw = 0
 	const send = (value: unknown) =>
 		window.ReactNativeWebView.postMessage(JSON.stringify(value))
 	const fail = (error: unknown) =>
@@ -129,103 +145,175 @@ function runtime() {
 			type: 'error',
 			message: error instanceof Error ? error.message : String(error),
 		})
-	function draw(showSelection = true) {
-		ctx.clearRect(0, 0, canvas.width, canvas.height)
-		ctx.fillStyle = '#000000'
-		ctx.fillRect(0, 0, canvas.width, canvas.height)
+	function drawHistory() {
+		send({
+			type: 'draw-history',
+			undo: ink.length > 0,
+			redo: redoInk.length > 0,
+		})
+	}
+	function resetInk() {
+		ink.length = redoInk.length = 0
+		stroke = undefined
+		drawHistory()
+	}
+	function paintSource(context: CanvasRenderingContext2D) {
 		const source = kind === 'image' ? image : media
-		if (source && (kind === 'image' || media.readyState >= 2)) {
+		if (!source || (kind === 'video' && media.readyState < 2)) return
+		const adjusting = straighten !== 0 || horizontal !== 0 || vertical !== 0
+		const target = adjusting ? adjustedContext : context
+		if (adjusting) {
+			const { width: pixelsWide, height: pixelsHigh } = context.canvas
 			if (
-				adjustedSource.width !== canvas.width ||
-				adjustedSource.height !== canvas.height
+				adjustedSource.width !== pixelsWide ||
+				adjustedSource.height !== pixelsHigh
 			) {
-				adjustedSource.width = canvas.width
-				adjustedSource.height = canvas.height
+				adjustedSource.width = pixelsWide
+				adjustedSource.height = pixelsHigh
 			}
-			const adjusting = straighten !== 0 || horizontal !== 0 || vertical !== 0
-			const target = adjusting ? adjustedContext : ctx
-			if (adjusting) target.clearRect(0, 0, canvas.width, canvas.height)
-			target.save()
-			target.translate(canvas.width / 2, canvas.height / 2)
-			target.scale(flipped ? -1 : 1, 1)
-			target.rotate((rotation * Math.PI) / 2)
-			target.drawImage(source, -width / 2, -height / 2, width, height)
-			target.restore()
-			if (adjusting)
-				drawAdjusted(ctx, adjustedSource, { straighten, horizontal, vertical })
+			target.setTransform(
+				pixelsWide / stageWidth,
+				0,
+				0,
+				pixelsHigh / stageHeight,
+				0,
+				0,
+			)
+			target.clearRect(0, 0, stageWidth, stageHeight)
 		}
+		target.save()
+		target.translate(stageWidth / 2, stageHeight / 2)
+		target.scale(flipped ? -1 : 1, 1)
+		target.rotate((rotation * Math.PI) / 2)
+		target.drawImage(source, -width / 2, -height / 2, width, height)
+		target.restore()
+		if (adjusting)
+			drawAdjusted(
+				context,
+				adjustedSource,
+				{ straighten, horizontal, vertical },
+				stageWidth,
+				stageHeight,
+			)
+	}
+	function draw(showSelection = true, context = ctx) {
+		const { width: pixelsWide, height: pixelsHigh } = context.canvas
+		context.setTransform(
+			pixelsWide / stageWidth,
+			0,
+			0,
+			pixelsHigh / stageHeight,
+			0,
+			0,
+		)
+		context.clearRect(0, 0, stageWidth, stageHeight)
+		const transform = `${rotation}/${flipped}/${straighten}/${horizontal}/${vertical}`
+		if (kind === 'video') {
+			context.fillStyle = '#000000'
+			context.fillRect(0, 0, stageWidth, stageHeight)
+			paintSource(context)
+		} else if (context === ctx) {
+			if (
+				previewSource !== image ||
+				previewTransform !== transform ||
+				previewBase.width !== pixelsWide ||
+				previewBase.height !== pixelsHigh
+			) {
+				previewBase.width = pixelsWide
+				previewBase.height = pixelsHigh
+				const base = previewBase.getContext('2d')!
+				base.setTransform(
+					pixelsWide / stageWidth,
+					0,
+					0,
+					pixelsHigh / stageHeight,
+					0,
+					0,
+				)
+				paintSource(base)
+				previewSource = image
+				previewTransform = transform
+			}
+			context.drawImage(previewBase, 0, 0, stageWidth, stageHeight)
+		} else paintSource(context)
+		drawInk(context, ink, transform, stageWidth, stageHeight)
 		for (const layer of layers) {
-			if (layer.kind === 'ink') {
-				ctx.strokeStyle = layer.color
-				ctx.lineWidth = layer.size
-				ctx.lineCap = 'round'
-				ctx.lineJoin = 'round'
-				ctx.beginPath()
-				layer.points.forEach((p, i) =>
-					i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y),
-				)
-				ctx.stroke()
-			} else if (layer.kind === 'text') {
-				ctx.font = `bold ${layer.size}px sans-serif`
-				ctx.textAlign = 'center'
-				ctx.textBaseline = 'middle'
-				ctx.lineWidth = Math.max(2, layer.size / 14)
-				ctx.strokeStyle = '#000000'
-				ctx.fillStyle = layer.color
-				ctx.strokeText(layer.text, layer.x, layer.y)
-				ctx.fillText(layer.text, layer.x, layer.y)
-			} else
-				ctx.drawImage(
+			context.save()
+			context.translate(layer.x, layer.y)
+			context.rotate(layer.angle)
+			context.scale(layer.scale, layer.scale)
+			if (layer.kind === 'text') drawText(context, { ...layer, x: 0, y: 0 })
+			else
+				context.drawImage(
 					layer.image,
-					layer.x - layer.size / 2,
-					layer.y - layer.size / 2,
+					-layer.size / 2,
+					-layer.size / 2,
 					layer.size,
 					layer.size,
 				)
+			context.restore()
+		}
+		if (
+			showSelection &&
+			kind === 'image' &&
+			selected &&
+			!cropping &&
+			!drawing
+		) {
+			const unit = selectionUnit()
+			drawLayerSelection(context, getLayerSelection(selected, unit), unit)
 		}
 		if (showSelection && cropping && cropBox) {
 			const { x, y, width: w, height: h } = cropBox
 			const scale =
-				canvas.width / Math.max(1, canvas.getBoundingClientRect().width)
-			ctx.save()
-			ctx.fillStyle = 'rgba(0,0,0,0.55)'
-			ctx.fillRect(0, 0, canvas.width, y)
-			ctx.fillRect(0, y + h, canvas.width, canvas.height - y - h)
-			ctx.fillRect(0, y, x, h)
-			ctx.fillRect(x + w, y, canvas.width - x - w, h)
-			ctx.strokeStyle = '#ffffff'
-			ctx.lineWidth = 1.2 * scale
-			ctx.strokeRect(x, y, w, h)
-			ctx.strokeStyle = 'rgba(255,255,255,0.5)'
-			ctx.lineWidth = 0.6 * scale
-			ctx.beginPath()
+				stageWidth / Math.max(1, canvas.getBoundingClientRect().width)
+			context.save()
+			context.fillStyle = 'rgba(0,0,0,0.55)'
+			context.fillRect(0, 0, stageWidth, y)
+			context.fillRect(0, y + h, stageWidth, stageHeight - y - h)
+			context.fillRect(0, y, x, h)
+			context.fillRect(x + w, y, stageWidth - x - w, h)
+			context.strokeStyle = '#ffffff'
+			context.lineWidth = 1.2 * scale
+			context.strokeRect(x, y, w, h)
+			context.strokeStyle = 'rgba(255,255,255,0.5)'
+			context.lineWidth = 0.6 * scale
+			context.beginPath()
 			for (let i = 1; i < 3; i++) {
-				ctx.moveTo(x + (w * i) / 3, y)
-				ctx.lineTo(x + (w * i) / 3, y + h)
-				ctx.moveTo(x, y + (h * i) / 3)
-				ctx.lineTo(x + w, y + (h * i) / 3)
+				context.moveTo(x + (w * i) / 3, y)
+				context.lineTo(x + (w * i) / 3, y + h)
+				context.moveTo(x, y + (h * i) / 3)
+				context.lineTo(x + w, y + (h * i) / 3)
 			}
-			ctx.stroke()
-			ctx.strokeStyle = '#ffffff'
-			ctx.lineWidth = 3 * scale
+			context.stroke()
+			context.strokeStyle = '#ffffff'
+			context.lineWidth = 3 * scale
 			const length = Math.min(18 * scale, w / 4, h / 4)
 			for (const sx of [-1, 1])
 				for (const sy of [-1, 1]) {
 					const cx = sx < 0 ? x : x + w,
 						cy = sy < 0 ? y : y + h
-					ctx.beginPath()
-					ctx.moveTo(cx - sx * length, cy)
-					ctx.lineTo(cx, cy)
-					ctx.lineTo(cx, cy - sy * length)
-					ctx.stroke()
+					context.beginPath()
+					context.moveTo(cx - sx * length, cy)
+					context.lineTo(cx, cy)
+					context.lineTo(cx, cy - sy * length)
+					context.stroke()
 				}
-			ctx.restore()
+			context.restore()
 		}
 	}
 
 	function resize() {
-		canvas.width = rotation % 2 ? height : width
-		canvas.height = rotation % 2 ? width : height
+		stageWidth = rotation % 2 ? height : width
+		stageHeight = rotation % 2 ? width : height
+		// Image edits stay in source coordinates; only the interactive preview is downsampled.
+		const scale =
+			kind === 'image'
+				? Math.min(1, 960 / Math.max(stageWidth, stageHeight))
+				: 1
+		canvas.width = Math.max(1, Math.round(stageWidth * scale))
+		canvas.height = Math.max(1, Math.round(stageHeight * scale))
+		canvas.style.aspectRatio = `${stageWidth} / ${stageHeight}`
 		draw()
 	}
 	function ready() {
@@ -233,8 +321,9 @@ function runtime() {
 			1,
 			(kind === 'video' ? 1920 : 4096) / Math.max(width, height),
 		)
-		width = Math.max(2, Math.floor((width * scale) / 2) * 2)
-		height = Math.max(2, Math.floor((height * scale) / 2) * 2)
+		const step = kind === 'video' ? 2 : 1
+		width = Math.max(step, Math.floor((width * scale) / step) * step)
+		height = Math.max(step, Math.floor((height * scale) / step) * step)
 		resize()
 		send({
 			type: 'ready',
@@ -267,18 +356,69 @@ function runtime() {
 	function point(event: PointerEvent): Point {
 		const rect = canvas.getBoundingClientRect()
 		return {
-			x: ((event.clientX - rect.left) * canvas.width) / rect.width,
-			y: ((event.clientY - rect.top) * canvas.height) / rect.height,
+			x: ((event.clientX - rect.left) * stageWidth) / rect.width,
+			y: ((event.clientY - rect.top) * stageHeight) / rect.height,
 		}
 	}
+	function selectionUnit() {
+		return stageWidth / Math.max(1, canvas.getBoundingClientRect().width)
+	}
+	function layerBounds(layer: Layer) {
+		if (layer.kind === 'emoji') return { width: layer.size, height: layer.size }
+		const bounds = textLayout(ctx, layer)
+		const padding =
+			layer.style.border === 'opaque' || layer.style.border === 'translucent'
+				? layer.size / 2
+				: 0
+		return { width: bounds.width + padding, height: bounds.height + padding }
+	}
+	function getLayerSelection(layer: Layer, unit: number) {
+		return layerSelection(
+			layer,
+			layerBounds(layer),
+			unit,
+			stageWidth,
+			stageHeight,
+		)
+	}
+	function startLayerDrag(
+		action: 'move' | 'resize' | 'rotate',
+		layer: Layer,
+		start: Point,
+	) {
+		const dx = start.x - layer.x
+		const dy = start.y - layer.y
+		layerDrag = {
+			action,
+			distance: Math.max(1, Math.hypot(dx, dy)),
+			angle: Math.atan2(dy, dx) - layer.angle,
+			scale: layer.scale,
+		}
+	}
+	function scheduleDraw() {
+		if (pendingDraw) return
+		pendingDraw = requestAnimationFrame(() => {
+			pendingDraw = 0
+			draw()
+		})
+	}
+	function finishPointer() {
+		const id = pointer
+		pointer = undefined
+		last = cropStart = undefined
+		cropDrag = stroke = layerDrag = undefined
+		if (id !== undefined && canvas.hasPointerCapture(id))
+			canvas.releasePointerCapture(id)
+	}
 	canvas.onpointerdown = event => {
-		if (exporting) return
-		canvas.setPointerCapture(event.pointerId)
+		if (exporting || pointer !== undefined) return
+		pointer = event.pointerId
+		canvas.setPointerCapture(pointer)
 		last = point(event)
 		if (cropping && cropBox) {
 			const box = cropBox
 			const hit =
-				(18 * canvas.width) / Math.max(1, canvas.getBoundingClientRect().width)
+				(18 * stageWidth) / Math.max(1, canvas.getBoundingClientRect().width)
 			const nearX = last.x >= box.x - hit && last.x <= box.x + box.width + hit
 			const nearY = last.y >= box.y - hit && last.y <= box.y + box.height + hit
 			const left = nearY && Math.abs(last.x - box.x) <= hit,
@@ -291,7 +431,7 @@ function runtime() {
 				last.y >= box.y &&
 				last.y <= box.y + box.height
 			if (!inside && !left && !right && !top && !bottom) {
-				last = undefined
+				finishPointer()
 				return
 			}
 			cropStart = last
@@ -307,33 +447,53 @@ function runtime() {
 		}
 		if (drawing) {
 			stroke = {
-				kind: 'ink',
+				brush,
 				points: [last],
 				color,
-				size: (size * canvas.width) / 400,
+				size: (size * stageWidth) / 400,
 			}
-			layers.push(stroke)
+			ink.push(stroke)
+			redoInk.length = 0
+			drawHistory()
+			scheduleDraw()
 		} else {
+			const start = last
+			const unit = selectionUnit()
+			if (selected) {
+				const handles = getLayerSelection(selected, unit).handles
+				// Prefer the closest handle when a small object has overlapping hit areas.
+				const handle = handles
+					.map(handle => ({
+						...handle,
+						distance: Math.hypot(start.x - handle.x, start.y - handle.y),
+					}))
+					.sort((a, b) => a.distance - b.distance)[0]
+				if (
+					handle &&
+					handle.distance < (handle.action === 'resize' ? 12 : 14) * unit
+				) {
+					if (handle.action === 'delete') {
+						layers.splice(layers.indexOf(selected), 1)
+						selected = undefined
+						finishPointer()
+					} else startLayerDrag(handle.action, selected, start)
+					scheduleDraw()
+					return
+				}
+			}
 			selected = undefined
 			for (let i = layers.length - 1; i >= 0; i--) {
 				const layer = layers[i]
-				if (layer.kind === 'ink') continue
-				const halfWidth =
-					layer.kind === 'emoji'
-						? layer.size / 2
-						: Math.max(layer.size, layer.text.length * layer.size * 0.35)
-				if (
-					Math.abs(layer.x - last.x) < halfWidth &&
-					Math.abs(layer.y - last.y) < layer.size
-				) {
-					selected = layer
-					break
-				}
+				if (!layerContains(layer, layerBounds(layer), start, 8 * unit)) continue
+				selected = layer
+				startLayerDrag('move', layer, start)
+				break
 			}
+			scheduleDraw()
 		}
 	}
 	canvas.onpointermove = event => {
-		if (!last || exporting) return
+		if (!last || event.pointerId !== pointer || exporting) return
 		const next = point(event)
 		if (cropping && cropStart && cropDrag) {
 			cropBox = moveCrop(
@@ -342,52 +502,78 @@ function runtime() {
 				next.y - cropStart.y,
 				cropDrag,
 				{
-					width: canvas.width,
-					height: canvas.height,
+					width: stageWidth,
+					height: stageHeight,
 					displayWidth: canvas.getBoundingClientRect().width,
 				},
 				cropRatio,
 			)
 		} else if (stroke) stroke.points.push(next)
-		else if (selected) {
-			selected.x += next.x - last.x
-			selected.y += next.y - last.y
+		else if (selected && layerDrag) {
+			if (layerDrag.action === 'move') {
+				selected.x = Math.max(
+					0,
+					Math.min(stageWidth, selected.x + next.x - last.x),
+				)
+				selected.y = Math.max(
+					0,
+					Math.min(stageHeight, selected.y + next.y - last.y),
+				)
+			} else {
+				const x = next.x - selected.x
+				const y = next.y - selected.y
+				if (layerDrag.action === 'rotate')
+					selected.angle = Math.atan2(y, x) - layerDrag.angle
+				else
+					selected.scale = Math.max(
+						0.15,
+						Math.min(
+							8,
+							(layerDrag.scale * Math.hypot(x, y)) / layerDrag.distance,
+						),
+					)
+			}
 		}
 		last = next
-		draw()
+		scheduleDraw()
 	}
-	canvas.onpointerup = canvas.onpointercancel = () => {
-		last = undefined
-		cropStart = undefined
-		cropDrag = undefined
-		stroke = undefined
-	}
+	canvas.onpointerup =
+		canvas.onpointercancel =
+		canvas.onlostpointercapture =
+			event => {
+				if (event.pointerId === pointer) finishPointer()
+			}
+	window.addEventListener('blur', finishPointer)
 	async function encode() {
 		if (exporting) return
 		if (kind === 'image') {
-			draw(false)
-			const output = document.createElement('canvas')
-			const bounds = cropBox ?? {
-				x: 0,
-				y: 0,
-				width: canvas.width,
-				height: canvas.height,
+			const fullSize = document.createElement('canvas')
+			fullSize.width = stageWidth
+			fullSize.height = stageHeight
+			draw(false, fullSize.getContext('2d')!)
+			let output = fullSize
+			if (
+				cropBox &&
+				(cropBox.width < stageWidth - 0.001 ||
+					cropBox.height < stageHeight - 0.001)
+			) {
+				output = document.createElement('canvas')
+				output.width = Math.max(1, Math.round(cropBox.width))
+				output.height = Math.max(1, Math.round(cropBox.height))
+				output
+					.getContext('2d')!
+					.drawImage(
+						fullSize,
+						cropBox.x,
+						cropBox.y,
+						cropBox.width,
+						cropBox.height,
+						0,
+						0,
+						output.width,
+						output.height,
+					)
 			}
-			output.width = Math.max(1, Math.round(bounds.width))
-			output.height = Math.max(1, Math.round(bounds.height))
-			output
-				.getContext('2d')!
-				.drawImage(
-					canvas,
-					bounds.x,
-					bounds.y,
-					bounds.width,
-					bounds.height,
-					0,
-					0,
-					output.width,
-					output.height,
-				)
 			send({
 				type: 'result',
 				mime: 'image/png',
@@ -424,8 +610,8 @@ function runtime() {
 		const bounds = cropBox ?? {
 			x: 0,
 			y: 0,
-			width: canvas.width,
-			height: canvas.height,
+			width: stageWidth,
+			height: stageHeight,
 		}
 		const output = document.createElement('canvas')
 		output.width = Math.max(2, Math.floor(bounds.width / 2) * 2)
@@ -542,6 +728,9 @@ function runtime() {
 	window.mediaCommand = command => {
 		try {
 			if (command.type === 'cancel') {
+				finishPointer()
+				cancelAnimationFrame(pendingDraw)
+				pendingDraw = 0
 				thumbnailVideo?.removeAttribute('src')
 				thumbnailVideo?.load()
 				thumbnailVideo = undefined
@@ -653,6 +842,7 @@ function runtime() {
 					cropBox = undefined
 					cropping = false
 					layers.length = 0
+					resetInk()
 					selected = undefined
 					rotation = 0
 					flipped = false
@@ -680,6 +870,7 @@ function runtime() {
 					break
 				}
 				case 'crop': {
+					finishPointer()
 					media.pause()
 					cropping = true
 					drawing = false
@@ -689,12 +880,12 @@ function runtime() {
 					if (!cropBox || ratioChanged) {
 						const w =
 							cropRatio > 0
-								? Math.min(canvas.width, canvas.height * cropRatio)
-								: canvas.width
-						const h = cropRatio > 0 ? w / cropRatio : canvas.height
+								? Math.min(stageWidth, stageHeight * cropRatio)
+								: stageWidth
+						const h = cropRatio > 0 ? w / cropRatio : stageHeight
 						cropBox = {
-							x: (canvas.width - w) / 2,
-							y: (canvas.height - h) / 2,
+							x: (stageWidth - w) / 2,
+							y: (stageHeight - h) / 2,
 							width: w,
 							height: h,
 						}
@@ -711,45 +902,50 @@ function runtime() {
 					resize()
 					break
 				case 'tool':
+					finishPointer()
 					cropping = false
 					drawing = command.draw
-					color = command.color
-					size = command.size
-					if (selected) {
-						selected.size = (size * canvas.width) / 400
-						if (selected.kind === 'text') selected.color = color
+					if (command.color !== undefined) color = command.color
+					if (command.size !== undefined) size = command.size
+					if (command.brush !== undefined) brush = command.brush
+					break
+				case 'text-style':
+					if (selected?.kind === 'text') {
+						selected.style = { ...selected.style, ...command.style }
+						selected.size = (selected.style.size * stageWidth) / 400
 					}
 					break
 				case 'text':
-					cropping = false
+					cropping = drawing = false
 					selected = {
 						kind: 'text',
-						text: command.text,
-						color: command.color,
-						size: (command.size * canvas.width) / 400,
-						x: canvas.width / 2,
-						y: canvas.height / 2,
+						angle: 0,
+						scale: 1,
+						text: command.text.slice(0, 1000),
+						style: command.style,
+						size: (command.style.size * stageWidth) / 400,
+						x: stageWidth / 2,
+						y: stageHeight / 2,
 					}
 					layers.push(selected)
-					drawing = false
 					break
 				case 'emoji': {
-					cropping = false
 					const emoji = new Image()
 					emoji.onload = () => {
 						selected = {
 							kind: 'emoji',
+							angle: 0,
+							scale: 1,
 							image: emoji,
-							size: canvas.width / 5,
-							x: canvas.width / 2,
-							y: canvas.height / 2,
+							size: stageWidth / 5,
+							x: stageWidth / 2,
+							y: stageHeight / 2,
 						}
 						layers.push(selected)
 						draw()
 					}
 					emoji.onerror = () => fail(new Error('Could not load this emoji.'))
 					emoji.src = command.data
-					drawing = false
 					break
 				}
 				case 'adjust-angle':
@@ -772,6 +968,7 @@ function runtime() {
 					resize()
 					break
 				case 'revert':
+					finishPointer()
 					media.pause()
 					soundtrack.pause()
 					if (musicUrl) URL.revokeObjectURL(musicUrl)
@@ -793,16 +990,27 @@ function runtime() {
 					cropDrag = undefined
 					cropping = drawing = false
 					layers.length = 0
+					resetInk()
 					selected = undefined
 					stroke = undefined
 					last = undefined
-					media.currentTime = 0
+					if (kind === 'video') media.currentTime = 0
 					resize()
 					break
-				case 'undo':
-					layers.pop()
-					selected = undefined
+				case 'undo-draw': {
+					finishPointer()
+					const previous = ink.pop()
+					if (previous) redoInk.push(previous)
+					stroke = undefined
+					drawHistory()
 					break
+				}
+				case 'redo-draw': {
+					const next = redoInk.pop()
+					if (next) ink.push(next)
+					drawHistory()
+					break
+				}
 				case 'trim':
 					start = command.start
 					end = command.end

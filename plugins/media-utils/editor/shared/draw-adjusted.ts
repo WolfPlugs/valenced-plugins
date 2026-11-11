@@ -5,10 +5,9 @@ export function drawAdjusted(
 	ctx: CanvasRenderingContext2D,
 	adjustedSource: HTMLCanvasElement,
 	{ straighten, horizontal, vertical }: AngleAdjustment,
+	w: number,
+	h: number,
 ) {
-	const canvas = ctx.canvas
-	const w = canvas.width,
-		h = canvas.height
 	const angle = (straighten * Math.PI) / 180
 	const cos = Math.cos(angle),
 		sin = Math.sin(angle)
@@ -31,7 +30,7 @@ export function drawAdjusted(
 		ctx.translate(w / 2, h / 2)
 		ctx.rotate(angle)
 		ctx.scale(zoom, zoom)
-		ctx.drawImage(adjustedSource, -w / 2, -h / 2)
+		ctx.drawImage(adjustedSource, -w / 2, -h / 2, w, h)
 		ctx.restore()
 		return
 	}
@@ -75,7 +74,7 @@ export function drawAdjusted(
 			p.x - aa * a.x - cc * a.y,
 			p.y - bb * a.x - dd * a.y,
 		)
-		ctx.drawImage(adjustedSource, 0, 0)
+		ctx.drawImage(adjustedSource, 0, 0, w, h)
 		ctx.restore()
 	}
 	const count = 12

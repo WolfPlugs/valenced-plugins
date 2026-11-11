@@ -4,7 +4,6 @@ import { withName, withProps } from '@valenced/modules/finders/filters'
 import { instead } from '@valenced/patcher'
 import { lookupGeneratedIconComponent } from '@valenced/utils/discord'
 import { Children, cloneElement, isValidElement } from 'react'
-import { prepareNativeEditor } from './native-bridge'
 import {
 	closeOverlayEditor,
 	openEditorError,
@@ -12,14 +11,13 @@ import {
 } from './overlay-sheet'
 import { resolveWebView } from './webview'
 import type { ReactNode } from 'react'
-import type { EditorWebView, EmojiPicker } from './types'
+import type { EditorWebView } from './types'
 
 export function patchImageEditor(
 	cleanup: (callback: () => void) => void,
 	reportError: (error: unknown) => void,
 ) {
 	let WebView: EditorWebView | undefined
-	let emojiPicker: EmojiPicker | undefined
 	let disposed = false
 	cleanup(() => {
 		disposed = true
@@ -32,15 +30,6 @@ export function patchImageEditor(
 			),
 			module => {
 				WebView = module
-			},
-			{ max: 1 },
-		),
-	)
-	cleanup(
-		getModules(
-			withProps<EmojiPicker>('openEmojiPickerActionSheet'),
-			module => {
-				emojiPicker = module
 			},
 			{ max: 1 },
 		),
@@ -70,49 +59,9 @@ export function patchImageEditor(
 							!('item' in upload)
 						)
 							return result
-						if ('isImage' in upload && upload.isImage) {
-							function prepare(node: ReactNode): ReactNode {
-								if (
-									!isValidElement<{
-										children?: ReactNode
-										label?: unknown
-										icon?: ReactNode
-										onPress?: () => unknown
-									}>(node)
-								)
-									return node
-								const icon = lookupGeneratedIconComponent('PencilSparkleIcon')
-								if (
-									node.type === Design.TableRow &&
-									typeof node.props.onPress === 'function' &&
-									((icon &&
-										isValidElement(node.props.icon) &&
-										node.props.icon.type === icon) ||
-										(typeof node.props.label === 'string' &&
-											/^edit image$/i.test(node.props.label)))
-								) {
-									const press = node.props.onPress
-									return cloneElement(node, {
-										onPress: () => {
-											void prepareNativeEditor()
-												.catch(reportError)
-												.then(() => {
-													if (!disposed) press()
-												})
-										},
-									})
-								}
-								return node.props.children
-									? cloneElement(
-											node,
-											{},
-											Children.map(node.props.children, prepare),
-										)
-									: node
-							}
-							return isValidElement(result) ? prepare(result) : result
-						}
-						if (!('isVideo' in upload) || !upload.isVideo) return result
+						const isImage = 'isImage' in upload && Boolean(upload.isImage)
+						const isVideo = 'isVideo' in upload && Boolean(upload.isVideo)
+						if (!isImage && !isVideo) return result
 						const item = upload.item
 						if (
 							typeof item !== 'object' ||
@@ -123,7 +72,6 @@ export function patchImageEditor(
 							return result
 						const uri = item.uri
 						const onEdit = props.onEdit
-						const isVideo = 'isVideo' in upload && Boolean(upload.isVideo)
 						const EditIcon = lookupGeneratedIconComponent('PencilSparkleIcon')
 						const open = () => {
 							try {
@@ -141,9 +89,8 @@ export function patchImageEditor(
 												? item.mimeType
 												: undefined,
 									},
-									kind: isVideo ? 'video' : 'image',
+									kind: isImage ? 'image' : 'video',
 									WebView,
-									emojiPicker,
 									onEdit: edited => {
 										if (!disposed) Reflect.apply(onEdit, undefined, [edited])
 									},
@@ -154,6 +101,40 @@ export function patchImageEditor(
 								openEditorError(error)
 								reportError(error)
 							}
+						}
+						if (isImage) {
+							function replaceImageEditor(node: ReactNode): ReactNode {
+								if (
+									!isValidElement<{
+										children?: ReactNode
+										label?: unknown
+										icon?: ReactNode
+										onPress?: () => unknown
+									}>(node)
+								)
+									return node
+								if (
+									node.type === Design.TableRow &&
+									typeof node.props.onPress === 'function' &&
+									((EditIcon &&
+										isValidElement(node.props.icon) &&
+										node.props.icon.type === EditIcon) ||
+										(typeof node.props.label === 'string' &&
+											/^edit image$/i.test(node.props.label)))
+								) {
+									return cloneElement(node, { onPress: open })
+								}
+								return node.props.children
+									? cloneElement(
+											node,
+											{},
+											Children.map(node.props.children, replaceImageEditor),
+										)
+									: node
+							}
+							return isValidElement(result)
+								? replaceImageEditor(result)
+								: result
 						}
 						let inserted = false
 						function insert(node: ReactNode): ReactNode {

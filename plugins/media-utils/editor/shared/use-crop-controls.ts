@@ -34,6 +34,7 @@ export function useCropControls(send: (command: TransformCommand) => void) {
 		initialize,
 		reset,
 		open,
+		openOriginal: () => send({ type: 'crop', ratio: sourceRatio }),
 		panelProps: {
 			ratio: cropRatio,
 			landscape,

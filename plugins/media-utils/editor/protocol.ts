@@ -1,3 +1,4 @@
+import type { Brush, TextStyle } from './shared/markup'
 import type { AngleAdjustment } from './shared/transforms'
 
 // Commands supported by both image and video transforms.
@@ -26,7 +27,15 @@ export type CanvasCommand =
 	| TransformCommand
 	| VideoCommand
 	| { type: 'load'; data: string; kind: 'image' | 'video'; mime: string }
-	| { type: 'tool'; draw: boolean; color: string; size: number }
-	| { type: 'text'; text: string; color: string; size: number }
+	| {
+			type: 'tool'
+			draw: boolean
+			color?: string
+			size?: number
+			brush?: Brush
+	  }
+	| { type: 'text'; text: string; style: TextStyle }
+	| { type: 'text-style'; style: Partial<TextStyle> }
+	| { type: 'undo-draw' | 'redo-draw' }
 	| { type: 'emoji'; data: string }
-	| { type: 'undo' | 'revert' | 'export' | 'cancel' }
+	| { type: 'revert' | 'export' | 'cancel' }

@@ -1,6 +1,6 @@
 import { Design } from '@valenced/discord/design'
 import { lookupGeneratedIconComponent } from '@valenced/utils/discord'
-import { View } from 'react-native'
+import { Text, View } from 'react-native'
 import type { ComponentProps, ComponentType, ReactNode } from 'react'
 import type { ViewStyle } from 'react-native'
 
@@ -188,6 +188,143 @@ export function EditorIcon({
 						}}
 					/>
 				))}
+			</View>
+		)
+	if (name === 'DrawRedo')
+		return (
+			<View style={{ transform: [{ scaleX: -1 }] }}>
+				<EditorIcon name="UndoIcon" active={active} />
+			</View>
+		)
+	if (name === 'TextTool' || name === 'EmojiGrid')
+		return (
+			<Text style={{ color, fontSize: 24, fontWeight: '600' }}>
+				{name === 'TextTool' ? 'Aa' : '☺'}
+			</Text>
+		)
+	if (
+		name === 'pen' ||
+		name === 'highlighter' ||
+		name === 'mosaic' ||
+		name === 'eraser'
+	)
+		return (
+			<View
+				style={{
+					width: 26,
+					height: 26,
+					alignItems: 'center',
+					justifyContent: 'center',
+				}}
+			>
+				<View
+					style={{
+						width: name === 'eraser' ? 13 : 10,
+						height: name === 'eraser' ? 19 : 23,
+						borderWidth: 2,
+						borderColor: color,
+						borderRadius: name === 'eraser' ? 4 : 3,
+						overflow: 'hidden',
+						transform: [{ rotate: '40deg' }],
+					}}
+				>
+					<View
+						style={{
+							flex: 1,
+							backgroundColor:
+								name === 'pen'
+									? '#69a5ff'
+									: name === 'highlighter'
+										? '#ae8af7'
+										: name === 'eraser'
+											? '#95959e'
+											: 'transparent',
+						}}
+					/>
+					<View
+						style={{
+							height: name === 'mosaic' ? 7 : 6,
+							borderTopWidth: 1,
+							borderColor: color,
+							flexDirection: 'row',
+							justifyContent: 'space-around',
+						}}
+					>
+						{name === 'mosaic' &&
+							[0, 1].map(i => (
+								<View
+									key={i}
+									style={{
+										width: 2,
+										height: 3,
+										marginTop: i * 2,
+										backgroundColor: color,
+									}}
+								/>
+							))}
+					</View>
+				</View>
+			</View>
+		)
+	if (name === 'Decorations')
+		return (
+			<View style={{ width: 26, height: 26 }}>
+				<View
+					style={{
+						width: 22,
+						height: 22,
+						borderRadius: 11,
+						borderWidth: 2,
+						borderColor: color,
+					}}
+				>
+					<View
+						style={{
+							position: 'absolute',
+							top: 5,
+							left: 4,
+							width: 3,
+							height: 3,
+							borderRadius: 2,
+							backgroundColor: color,
+						}}
+					/>
+					<View
+						style={{
+							position: 'absolute',
+							top: 5,
+							right: 4,
+							width: 3,
+							height: 3,
+							borderRadius: 2,
+							backgroundColor: color,
+						}}
+					/>
+					<View
+						style={{
+							position: 'absolute',
+							top: 9,
+							left: 4,
+							width: 10,
+							height: 5,
+							borderBottomWidth: 2,
+							borderColor: color,
+							borderRadius: 5,
+						}}
+					/>
+				</View>
+				<View
+					style={{
+						position: 'absolute',
+						right: 1,
+						bottom: 1,
+						height: 4,
+						width: 11,
+						borderRadius: 2,
+						backgroundColor: color,
+						transform: [{ rotate: '-48deg' }],
+					}}
+				/>
 			</View>
 		)
 	if (name === 'Crop')

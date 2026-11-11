@@ -14,25 +14,13 @@ export type EditorWebView = ComponentType<{
 	onError(): void
 	onContentProcessDidTerminate(): void
 }>
-export type EmojiPicker = {
-	openEmojiPickerActionSheet(
-		props: {
-			onPressEmoji(emoji: unknown): void
-			pickerIntention: number
-			autoFocus: boolean
-			bypassPremiumEmojiEntitlement: boolean
-		},
-		stack?: string,
-	): void
-}
 export type OverlayProps = {
 	item: { uri: string; mimeType?: string }
 	kind: 'image' | 'video'
 	WebView: EditorWebView
-	emojiPicker?: EmojiPicker
 	onEdit(item: unknown): void
 	reportError(error: unknown): void
 	isCurrent(): boolean
 }
 
-export type EditorTool = 'Trim' | 'Crop' | 'Sound' | 'Text' | 'Paint' | 'Emoji'
+export type EditorTool = 'Trim' | 'Crop' | 'Sound' | 'Markup'

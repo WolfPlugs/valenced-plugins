@@ -1,42 +1,28 @@
 import { ActionSheetActionCreators } from '@valenced/discord/actions'
 import { Design } from '@valenced/discord/design'
-import { FileModule } from '@valenced/discord/native'
 import { ReactNativeSafeAreaContext } from '@valenced/externals/react-native-safe-area-context'
 import { useEffect, useRef, useState } from 'react'
-import {
-	Image,
-	KeyboardAvoidingView,
-	Modal,
-	ScrollView,
-	View,
-} from 'react-native'
+import { Keyboard, KeyboardAvoidingView, Modal, View } from 'react-native'
 import canvasHtml from './canvas-document.generated'
+import { EmojiDrawer } from './image/emoji-drawer'
+import { loadEmojiImage } from './image/emoji-image'
+import { MarkupPanel } from './image/markup-panel'
 import { readEditorMedia } from './media-file'
-import { getEditorEmojis } from './native-bridge'
 import { saveEditorResult } from './save-result'
 import { CropPanel } from './shared/crop-panel'
 import { EditorIconButton } from './shared/editor-icon'
+import { defaultTextStyle } from './shared/markup'
 import { useCropControls } from './shared/use-crop-controls'
 import { VideoControls } from './video/controls'
 import { pickSoundtrack } from './video/soundtrack'
+import type { EditorEmoji } from './image/emoji-drawer'
 import type { CanvasCommand } from './protocol'
 import type { EditorTool, OverlayProps, WebHandle } from './types'
 import type { TimelineFrames } from './video/timeline'
 
-// Text, paint, and emoji editing are temporarily disabled.
-const OVERLAYS_ENABLED: boolean = false
 const key = 'wolfie.media-utils.overlay'
 const { SafeAreaProvider, SafeAreaView } = ReactNativeSafeAreaContext
 let dismissEditor: (() => void) | undefined
-const colors = [
-	'#ffffff',
-	'#000000',
-	'#ed4245',
-	'#fee75c',
-	'#57f287',
-	'#5865f2',
-	'#eb459e',
-]
 
 function OverlaySheet({
 	item,
@@ -46,6 +32,7 @@ function OverlaySheet({
 	reportError,
 	isCurrent,
 }: OverlayProps) {
+	const isImage = kind === 'image'
 	const web = useRef<WebHandle>(null)
 	const active = useRef(true)
 	const saving = useRef(false)
@@ -68,13 +55,14 @@ function OverlaySheet({
 	const audioRequest = useRef(0)
 	const [resetKey, setResetKey] = useState(0)
 	const crop = useCropControls(send)
-	const [tool, setTool] = useState<EditorTool>('Trim')
-	const draw = tool === 'Paint'
-	const [color, setColor] = useState('#ffffff')
-	const [size, setSize] = useState(24)
-	const [text, setText] = useState('')
-	const [emojiQuery, setEmojiQuery] = useState('')
-	const [emojis] = useState(() => (OVERLAYS_ENABLED ? getEditorEmojis() : []))
+	const [tool, setTool] = useState<EditorTool>(isImage ? 'Crop' : 'Trim')
+	const [markupTool, setMarkupTool] = useState<'Draw' | 'Emoji' | 'Text'>(
+		'Draw',
+	)
+	const [drawHistory, setDrawHistory] = useState({ undo: false, redo: false })
+	const emojiRequest = useRef(0)
+	const [emojiOpen, setEmojiOpen] = useState(false)
+	const [recentEmoji, setRecentEmoji] = useState<EditorEmoji[]>([])
 	const html = useRef({ html: canvasHtml }).current
 	function send(command: CanvasCommand) {
 		web.current?.injectJavaScript(
@@ -101,20 +89,18 @@ function OverlaySheet({
 			if (dismissEditor === dismiss) dismissEditor = undefined
 		}
 	}, [])
-	useEffect(() => {
-		if (ready && tool !== 'Crop') send({ type: 'tool', draw, color, size })
-	}, [draw, color, size, ready, tool])
+
 	useEffect(() => {
 		if (ready && kind === 'video') send({ type: 'trim', start, end })
 	}, [start, end, ready])
 	useEffect(() => {
-		if (ready)
+		if (ready && !isImage)
 			send({
 				type: 'audio',
 				volume: volume / 100,
 				musicVolume: musicVolume / 100,
 			})
-	}, [volume, musicVolume, ready])
+	}, [volume, musicVolume, ready, isImage])
 	async function addSoundtrack() {
 		const request = ++audioRequest.current
 		setLoadingAudio(true)
@@ -133,26 +119,41 @@ function OverlaySheet({
 			failed(error)
 		}
 	}
-	async function emoji(value: unknown) {
-		if (typeof value !== 'object' || value === null) return
-		setTool('Text')
-		if (
-			'id' in value &&
-			typeof value.id === 'string' &&
-			/^\d+$/.test(value.id)
-		) {
-			try {
-				const data = await FileModule.readAsset(
-					`https://cdn.discordapp.com/emojis/${value.id}.png?size=256`,
-					'base64',
-				)
-				if (active.current)
-					send({ type: 'emoji', data: `data:image/png;base64,${data}` })
-			} catch (error) {
-				failed(error)
-			}
-		} else if ('surrogates' in value && typeof value.surrogates === 'string')
-			send({ type: 'text', text: value.surrogates, color, size: 64 })
+	async function insertEmoji(emoji: EditorEmoji) {
+		if (!active.current || saving.current || !isCurrent()) return
+		Keyboard.dismiss()
+		setEmojiOpen(false)
+		setRecentEmoji(list =>
+			[
+				emoji,
+				...list.filter(
+					item =>
+						(typeof item === 'string' ? item : item.id) !==
+						(typeof emoji === 'string' ? emoji : emoji.id),
+				),
+			].slice(0, 24),
+		)
+		const request = ++emojiRequest.current
+		if (typeof emoji === 'string') {
+			send({
+				type: 'text',
+				text: emoji,
+				style: { ...defaultTextStyle, size: 42 },
+			})
+			return
+		}
+		try {
+			const data = await loadEmojiImage(emoji.id)
+			if (
+				active.current &&
+				isCurrent() &&
+				!saving.current &&
+				request === emojiRequest.current
+			)
+				send({ type: 'emoji', data })
+		} catch (error) {
+			if (request === emojiRequest.current && !saving.current) failed(error)
+		}
 	}
 	async function message(raw: string) {
 		if (!active.current || !isCurrent()) return
@@ -164,7 +165,12 @@ function OverlaySheet({
 				!('type' in message)
 			)
 				return
-			if (message.type === 'soundtrack-error' && 'message' in message) {
+			if (message.type === 'draw-history') {
+				setDrawHistory({
+					undo: 'undo' in message && message.undo === true,
+					redo: 'redo' in message && message.redo === true,
+				})
+			} else if (message.type === 'soundtrack-error' && 'message' in message) {
 				setLoadingAudio(false)
 				setSoundtrack(null)
 				failed(new Error(String(message.message)))
@@ -237,6 +243,8 @@ function OverlaySheet({
 					message.height > 0
 				) {
 					crop.initialize(message.width, message.height)
+					if (isImage)
+						send({ type: 'crop', ratio: message.width / message.height })
 				}
 				setReady(true)
 			} else if (
@@ -267,21 +275,16 @@ function OverlaySheet({
 		closeOverlayEditor()
 	}
 	function choose(next: typeof tool) {
-		if (
-			busy ||
-			(!OVERLAYS_ENABLED &&
-				next !== 'Trim' &&
-				next !== 'Crop' &&
-				next !== 'Sound')
-		)
-			return
+		if (busy) return
 		setTool(next)
 		if (next === 'Crop') crop.open()
-		else send({ type: 'tool', draw: next === 'Paint', color, size })
+		else if (next !== 'Markup') send({ type: 'tool', draw: false })
 	}
 	function revert() {
 		if (!ready || busy) return
 		audioRequest.current++
+		emojiRequest.current++
+		setMarkupTool('Draw')
 		setStart(0)
 		setEnd(duration)
 		setPosition(0)
@@ -291,10 +294,11 @@ function OverlaySheet({
 		setSoundtrack(null)
 		setLoadingAudio(false)
 		setError('')
-		setTool('Trim')
+		setTool(isImage ? 'Crop' : 'Trim')
 		crop.reset()
 		setResetKey(value => value + 1)
 		send({ type: 'revert' })
+		if (isImage) crop.openOriginal()
 	}
 	function save() {
 		if (!ready || saving.current || loadingAudio) return
@@ -303,315 +307,236 @@ function OverlaySheet({
 		setError('')
 		send({ type: 'export' })
 	}
+	const editor = (
+		<SafeAreaProvider>
+			<SafeAreaView
+				edges={['top', 'bottom', 'left', 'right']}
+				style={{ flex: 1, backgroundColor: '#000000' }}
+			>
+				<KeyboardAvoidingView
+					behavior="height"
+					style={{ flex: 1, backgroundColor: '#000000' }}
+				>
+					<View
+						style={{
+							flexDirection: 'row',
+							alignItems: 'center',
+							justifyContent: 'space-between',
+							padding: 12,
+						}}
+					>
+						<View style={{ flexDirection: 'row', gap: 4 }}>
+							<EditorIconButton
+								name="ArrowSmallLeftIcon"
+								label="Cancel editing"
+								onPress={close}
+							/>
+							<EditorIconButton
+								name="UndoIcon"
+								label="Revert all edits"
+								disabled={!ready || busy}
+								onPress={revert}
+							/>
+						</View>
+						<Design.Text
+							style={{
+								color: '#ffffff',
+								fontSize: 18,
+								fontWeight: '600',
+							}}
+						>
+							Edit {kind}
+						</Design.Text>
+						<Design.Button
+							text={
+								busy
+									? isImage
+										? 'Saving…'
+										: `${Math.round(progress * 100)}%`
+									: 'Save'
+							}
+							size="sm"
+							disabled={!ready || busy || loadingAudio}
+							onPress={save}
+						/>
+					</View>
+					<View
+						style={{ flex: 1, minHeight: 0, overflow: 'hidden', zIndex: 0 }}
+					>
+						<WebView
+							ref={web}
+							source={html}
+							style={{ flex: 1, backgroundColor: '#000000' }}
+							containerStyle={{ flex: 1 }}
+							javaScriptEnabled
+							mediaPlaybackRequiresUserAction={false}
+							allowsInlineMediaPlayback
+							originWhitelist={['about:blank']}
+							onMessage={event => void message(event.nativeEvent.data)}
+							onError={() =>
+								failed(new Error('The media canvas failed to load.'))
+							}
+							onContentProcessDidTerminate={() =>
+								failed(
+									new Error(
+										'Android closed the editor. Reopen it to continue.',
+									),
+								)
+							}
+						/>
+					</View>
+					<View
+						style={{
+							flexShrink: 0,
+							zIndex: 1,
+							backgroundColor: '#000000',
+							padding: 12,
+							gap: 12,
+						}}
+					>
+						{error ? (
+							<Design.Text style={{ color: '#ff858b' }}>{error}</Design.Text>
+						) : null}
+						{!ready && !error ? (
+							<Design.Text style={{ color: '#ffffff' }}>
+								Loading {kind}…
+							</Design.Text>
+						) : null}
+						{busy ? (
+							<Design.Text style={{ color: '#ffffff' }}>
+								Saving {kind}… Keep this screen open.
+							</Design.Text>
+						) : (
+							ready && (
+								<>
+									{isImage ? (
+										tool === 'Crop' && <CropPanel {...crop.panelProps} />
+									) : (
+										<VideoControls
+											tool={tool}
+											playing={playing}
+											resetKey={resetKey}
+											onCommand={send}
+											timeline={{
+												duration,
+												start,
+												end,
+												position,
+												frames,
+												onTrim: (from, to, edge) => {
+													setStart(from)
+													setEnd(to)
+													send({
+														type: 'trim',
+														start: from,
+														end: to,
+														previewTime:
+															edge === 'start'
+																? from
+																: Math.max(from, to - 0.001),
+													})
+												},
+												onSeek: time => send({ type: 'seek', time }),
+												onFrames: (from, span, count) =>
+													send({
+														type: 'thumbnails',
+														from,
+														span,
+														count,
+														id: ++thumbnailRequest.current,
+													}),
+											}}
+											sound={{
+												volume,
+												musicVolume,
+												soundtrack,
+												loading: loadingAudio,
+												onVolume: setVolume,
+												onMusicVolume: setMusicVolume,
+												onPick: () => void addSoundtrack(),
+												onRemove: () => {
+													audioRequest.current++
+													setSoundtrack(null)
+													setLoadingAudio(false)
+													send({ type: 'soundtrack', data: null })
+												},
+											}}
+										>
+											{tool === 'Crop' && <CropPanel {...crop.panelProps} />}
+										</VideoControls>
+									)}
+									{isImage && (
+										<MarkupPanel
+											key={resetKey}
+											tool={tool === 'Markup' ? markupTool : undefined}
+											onTool={setMarkupTool}
+											send={send}
+											history={drawHistory}
+											onEmoji={() => {
+												Keyboard.dismiss()
+												setEmojiOpen(true)
+											}}
+										/>
+									)}
+									<View
+										style={{
+											flexDirection: 'row',
+											justifyContent: 'space-around',
+											gap: 4,
+										}}
+									>
+										{isImage
+											? (['Crop', 'Markup'] as const).map(value => (
+													<EditorIconButton
+														key={value}
+														name={value === 'Markup' ? 'Decorations' : value}
+														label={value === 'Markup' ? 'Decorations' : value}
+														active={tool === value}
+														onPress={() => choose(value)}
+													/>
+												))
+											: (['Trim', 'Crop', 'Sound'] as const).map(value => (
+													<EditorIconButton
+														key={value}
+														name={
+															value === 'Sound'
+																? volume === 0 &&
+																	(!soundtrack || musicVolume === 0)
+																	? 'VoiceXIcon'
+																	: 'VoiceNormalIcon'
+																: value
+														}
+														label={value}
+														active={tool === value}
+														onPress={() => choose(value)}
+													/>
+												))}
+									</View>
+								</>
+							)
+						)}
+					</View>
+				</KeyboardAvoidingView>
+				{emojiOpen && (
+					<EmojiDrawer
+						onClose={() => setEmojiOpen(false)}
+						onEmoji={value => void insertEmoji(value)}
+						recent={recentEmoji}
+						reportError={reportError}
+					/>
+				)}
+			</SafeAreaView>
+		</SafeAreaProvider>
+	)
 	return (
 		<Design.ActionSheet>
 			<View style={{ height: 1 }}>
-				<Modal visible={visible} animationType="slide" onRequestClose={close}>
-					<SafeAreaProvider>
-						<SafeAreaView
-							edges={['top', 'bottom', 'left', 'right']}
-							style={{ flex: 1, backgroundColor: '#000000' }}
-						>
-							<KeyboardAvoidingView
-								behavior="height"
-								style={{ flex: 1, backgroundColor: '#000000' }}
-							>
-								<View
-									style={{
-										flexDirection: 'row',
-										alignItems: 'center',
-										justifyContent: 'space-between',
-										padding: 12,
-									}}
-								>
-									<View style={{ flexDirection: 'row', gap: 4 }}>
-										<EditorIconButton
-											name="ArrowSmallLeftIcon"
-											label="Cancel editing"
-											onPress={close}
-										/>
-										<EditorIconButton
-											name="UndoIcon"
-											label="Revert all edits"
-											disabled={!ready || busy}
-											onPress={revert}
-										/>
-									</View>
-									<Design.Text
-										style={{
-											color: '#ffffff',
-											fontSize: 18,
-											fontWeight: '600',
-										}}
-									>
-										Edit video
-									</Design.Text>
-									<Design.Button
-										text={busy ? `${Math.round(progress * 100)}%` : 'Save'}
-										size="sm"
-										disabled={!ready || busy || loadingAudio}
-										onPress={save}
-									/>
-								</View>
-								<View style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
-									<WebView
-										ref={web}
-										source={html}
-										style={{ flex: 1, backgroundColor: '#000000' }}
-										containerStyle={{ flex: 1 }}
-										javaScriptEnabled
-										mediaPlaybackRequiresUserAction={false}
-										allowsInlineMediaPlayback
-										originWhitelist={['about:blank']}
-										onMessage={event => void message(event.nativeEvent.data)}
-										onError={() =>
-											failed(new Error('The media canvas failed to load.'))
-										}
-										onContentProcessDidTerminate={() =>
-											failed(
-												new Error(
-													'Android closed the editor. Reopen it to continue.',
-												),
-											)
-										}
-									/>
-								</View>
-								<View
-									style={{
-										flexShrink: 0,
-										backgroundColor: '#000000',
-										padding: 12,
-										gap: 12,
-									}}
-								>
-									{error ? (
-										<Design.Text style={{ color: '#ff858b' }}>
-											{error}
-										</Design.Text>
-									) : null}
-									{!ready && !error ? (
-										<Design.Text style={{ color: '#ffffff' }}>
-											Loading video…
-										</Design.Text>
-									) : null}
-									{busy ? (
-										<Design.Text style={{ color: '#ffffff' }}>
-											Saving video… Keep this screen open.
-										</Design.Text>
-									) : (
-										ready && (
-											<>
-												<VideoControls
-													tool={tool}
-													playing={playing}
-													resetKey={resetKey}
-													onCommand={send}
-													timeline={{
-														duration,
-														start,
-														end,
-														position,
-														frames,
-														onTrim: (from, to, edge) => {
-															setStart(from)
-															setEnd(to)
-															send({
-																type: 'trim',
-																start: from,
-																end: to,
-																previewTime:
-																	edge === 'start'
-																		? from
-																		: Math.max(from, to - 0.001),
-															})
-														},
-														onSeek: time => send({ type: 'seek', time }),
-														onFrames: (from, span, count) =>
-															send({
-																type: 'thumbnails',
-																from,
-																span,
-																count,
-																id: ++thumbnailRequest.current,
-															}),
-													}}
-													sound={{
-														volume,
-														musicVolume,
-														soundtrack,
-														loading: loadingAudio,
-														onVolume: setVolume,
-														onMusicVolume: setMusicVolume,
-														onPick: () => void addSoundtrack(),
-														onRemove: () => {
-															audioRequest.current++
-															setSoundtrack(null)
-															setLoadingAudio(false)
-															send({ type: 'soundtrack', data: null })
-														},
-													}}
-												>
-													{tool === 'Crop' && (
-														<CropPanel {...crop.panelProps} />
-													)}
-												</VideoControls>
-												{tool !== 'Trim' &&
-													tool !== 'Sound' &&
-													tool !== 'Crop' && (
-														<View style={{ height: 146 }}>
-															<ScrollView
-																keyboardShouldPersistTaps="handled"
-																contentContainerStyle={{ gap: 10 }}
-															>
-																{tool === 'Emoji' && (
-																	<>
-																		<Design.TextInput
-																			value={emojiQuery}
-																			onChange={setEmojiQuery}
-																			placeholder="Search server emojis"
-																		/>
-																		<View
-																			style={{
-																				flexDirection: 'row',
-																				flexWrap: 'wrap',
-																				gap: 8,
-																			}}
-																		>
-																			{emojis
-																				.filter(value =>
-																					value.name
-																						.toLowerCase()
-																						.includes(emojiQuery.toLowerCase()),
-																				)
-																				.slice(0, 60)
-																				.map(value => (
-																					<Design.Button
-																						key={value.id}
-																						text={value.name}
-																						variant="secondary"
-																						size="sm"
-																						renderIcon={() => (
-																							<Image
-																								source={{
-																									uri: `https://cdn.discordapp.com/emojis/${value.id}.png?size=64`,
-																								}}
-																								style={{
-																									width: 24,
-																									height: 24,
-																								}}
-																							/>
-																						)}
-																						onPress={() => void emoji(value)}
-																					/>
-																				))}
-																		</View>
-																		{emojis.length === 0 && (
-																			<Design.Text style={{ color: '#b5bac1' }}>
-																				No server emojis loaded. Use Text to add
-																				a keyboard emoji.
-																			</Design.Text>
-																		)}
-																	</>
-																)}
-																{tool === 'Text' && (
-																	<View
-																		style={{
-																			flexDirection: 'row',
-																			alignItems: 'center',
-																			gap: 8,
-																		}}
-																	>
-																		<View style={{ flex: 1 }}>
-																			<Design.TextInput
-																				value={text}
-																				onChange={setText}
-																				placeholder="Add text"
-																			/>
-																		</View>
-																		<Design.Button
-																			text="Add"
-																			size="sm"
-																			onPress={() => {
-																				if (text.trim()) {
-																					send({
-																						type: 'text',
-																						text: text.trim(),
-																						color,
-																						size,
-																					})
-																					setText('')
-																				}
-																			}}
-																		/>
-																	</View>
-																)}
-																{(tool === 'Text' || tool === 'Paint') && (
-																	<>
-																		<ScrollView
-																			horizontal
-																			showsHorizontalScrollIndicator={false}
-																			contentContainerStyle={{ gap: 8 }}
-																		>
-																			{colors.map(value => (
-																				<Design.Button
-																					key={value}
-																					accessibilityLabel={`Color ${value}`}
-																					text={value === color ? '●' : '○'}
-																					variant="secondary"
-																					size="sm"
-																					textStyle={{ color: value }}
-																					onPress={() => setColor(value)}
-																				/>
-																			))}
-																		</ScrollView>
-																		<Design.Slider
-																			minimumValue={4}
-																			maximumValue={100}
-																			step={1}
-																			value={size}
-																			onValueChange={setSize}
-																		/>
-																		<Design.Text style={{ color: '#b5bac1' }}>
-																			{tool === 'Paint'
-																				? 'Draw on the preview with your finger.'
-																				: 'Drag text or emoji to move it.'}
-																		</Design.Text>
-																	</>
-																)}
-															</ScrollView>
-														</View>
-													)}
-												<View
-													style={{
-														flexDirection: 'row',
-														justifyContent: 'space-around',
-														gap: 4,
-													}}
-												>
-													{(['Trim', 'Crop', 'Sound'] as const).map(value => (
-														<EditorIconButton
-															key={value}
-															name={
-																value === 'Sound'
-																	? volume === 0 &&
-																		(!soundtrack || musicVolume === 0)
-																		? 'VoiceXIcon'
-																		: 'VoiceNormalIcon'
-																	: value
-															}
-															label={value}
-															active={tool === value}
-															onPress={() => choose(value)}
-														/>
-													))}
-												</View>
-											</>
-										)
-									)}
-								</View>
-							</KeyboardAvoidingView>
-						</SafeAreaView>
-					</SafeAreaProvider>
+				<Modal
+					visible={visible}
+					animationType="slide"
+					onRequestClose={emojiOpen ? () => setEmojiOpen(false) : close}
+				>
+					{editor}
 				</Modal>
 			</View>
 		</Design.ActionSheet>

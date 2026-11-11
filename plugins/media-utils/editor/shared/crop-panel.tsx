@@ -61,13 +61,13 @@ export function CropPanel({
 			>
 				<EditorIconButton
 					name="Flip"
-					label="Flip video horizontally"
+					label="Flip horizontally"
 					active={flipped}
 					onPress={onFlip}
 				/>
 				<EditorIconButton
 					name="Rotate"
-					label="Rotate video 90 degrees"
+					label="Rotate 90 degrees"
 					onPress={onRotate}
 				/>
 				<EditorIconButton
