@@ -1,0 +1,29 @@
+plugins/media-utils/file-previews/index.ts
+  s_b406fcc1c9ec1a::t_f5af702dd7e32d 65-79,132-135,262-264,268-276,304-305,307-313,315-317,327,343-349,412-416
+  s_b406fcc1c9ec1a::t_a0b43378e8d3a8 7,23,39-41,60-64,93,100,102-106,155-169,186,288-295,303,306,314,318-326,335,421-425
+plugins/media-utils/file-previews/matroska.ts
+  s_b406fcc1c9ec1a::t_a0b43378e8d3a8 1-81
+plugins/media-utils/settings/config.ts
+  s_b406fcc1c9ec1a::t_a0b43378e8d3a8 6,19,42
+plugins/media-utils/settings/index.tsx
+  s_b406fcc1c9ec1a::t_39cd30cc68d7ec 20-37,124
+  s_b406fcc1c9ec1a::t_a0b43378e8d3a8 46
+plugins/media-utils/manifest.json
+  s_b406fcc1c9ec1a::t_39cd30cc68d7ec 8
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "a818e5c837b205c312cd28a493c6665c96db9eb4",
+  "prompts": {},
+  "sessions": {
+    "s_b406fcc1c9ec1a": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1804e-2726-7df3-9724-bbf44180097b",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Wolfkid200444 <32025746+Wolfkid200444@users.noreply.github.com>"
+    }
+  }
+}
