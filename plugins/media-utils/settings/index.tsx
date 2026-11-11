@@ -17,26 +17,33 @@ const options = [
 ] satisfies [Exclude<keyof Settings, 'doubleTapZoom'>, string][]
 const optionsKey = 'wolfie.media-utils.options'
 
-export function MediaControls({ store }: { store: SettingsStore }) {
+function MediaControls({ store }: { store: SettingsStore }) {
+	const settings = readSettings(store.use())
+	return (
+		<Design.TableRowGroup title="Media controls">
+			{options.map(([key, label]) => (
+				<Design.TableCheckboxRow
+					key={key}
+					value={key}
+					label={label}
+					checked={settings[key]}
+					onPress={() => store.set({ [key]: !settings[key] })}
+				/>
+			))}
+		</Design.TableRowGroup>
+	)
+}
+
+function PreviewAndZoomSettings({ store }: { store: SettingsStore }) {
 	const settings = readSettings(store.use())
 	return (
 		<>
-			<Design.TableRowGroup title="Media controls">
-				{options.map(([key, label]) => (
-					<Design.TableCheckboxRow
-						key={key}
-						value={key}
-						label={label}
-						checked={settings[key]}
-						onPress={() => store.set({ [key]: !settings[key] })}
-					/>
-				))}
-			</Design.TableRowGroup>
 			<Design.TableRowGroup title="File previews">
 				{(
 					[
 						['previewPsd', 'Preview PSD files'],
 						['previewNef', 'Preview Nikon NEF / NRW files'],
+						['previewMkv', 'Preview MKV videos'],
 						['highQualityPreviews', 'High-quality file previews'],
 					] as const
 				).map(([key, label]) => (
@@ -114,6 +121,7 @@ export default function SettingsComponent({ api: { jsonStorage } }: Props) {
 		>
 			<Page>
 				<MediaControls store={jsonStorage} />
+				<PreviewAndZoomSettings store={jsonStorage} />
 			</Page>
 		</ScrollView>
 	)

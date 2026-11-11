@@ -4,6 +4,7 @@ import { FileModule } from '@valenced/discord/native'
 import { readSettings } from '../settings/config'
 import { base64, rangeReader } from './download'
 import { extractPreview, fileFormat, orientJpeg, previewPlan } from './formats'
+import { matroskaDimensions } from './matroska'
 import { psdComposite } from './psd-composite'
 import type { DiscordModules } from '@valenced/discord/types'
 import type { SettingsStore } from '../settings/config'
@@ -19,7 +20,7 @@ type Attachment = {
 	id: string
 	filename: string
 	url: string
-	format: FileFormat
+	format: FileFormat | 'mkv'
 }
 function attachment(value: unknown): Attachment | undefined {
 	if (
@@ -35,7 +36,9 @@ function attachment(value: unknown): Attachment | undefined {
 		!/^https:\/\//i.test(value.url)
 	)
 		return
-	const format = fileFormat(value.filename)
+	const format = /\.mkv$/i.test(value.filename)
+		? 'mkv'
+		: fileFormat(value.filename)
 	if (format)
 		return {
 			raw: value,
@@ -54,6 +57,26 @@ type Preview = {
 	mimeType: 'image/png' | 'image/jpeg'
 	filename: string
 }
+type VideoPreview = {
+	mimeType: 'video/x-matroska'
+	width: number
+	height: number
+}
+// Discord classifies MKV attachments as generic files even with video metadata.
+// A video embed selects the player without adding another attachment.
+const mkvProvider = 'MediaUtils MKV preview'
+function isMkvPreview(value: unknown) {
+	if (typeof value !== 'object' || value === null || !('provider' in value))
+		return false
+	const { provider } = value
+	return (
+		typeof provider === 'object' &&
+		provider !== null &&
+		'name' in provider &&
+		provider.name === mkvProvider
+	)
+}
+
 type Target = { channel: string; message: string }
 const folder = 'media-utils-file-previews'
 
@@ -67,16 +90,20 @@ export function patchFilePreviews(
 	let running = false
 	let cachedBytes = 0
 	const controller = new AbortController()
-	const previews = new Map<string, Preview>()
+	const previews = new Map<string, Preview | VideoPreview>()
 	const previewIds = new Set<string>()
 	const failed = new Set<string>()
 	const pending = new Set<string>()
 	const queue: (Attachment & { quality: boolean; key: string })[] = []
 	const targets = new Map<string, Target>()
 	const timers = new Set<ReturnType<typeof setTimeout>>()
-	const enabled = (format: FileFormat) => {
+	const enabled = (format: FileFormat | 'mkv') => {
 		const settings = readSettings(store.cache)
-		return format === 'psd' ? settings.previewPsd : settings.previewNef
+		return format === 'mkv'
+			? settings.previewMkv
+			: format === 'psd'
+				? settings.previewPsd
+				: settings.previewNef
 	}
 	function storedMessage(target: Target) {
 		const messageStore = Stores.MessageStore as DiscordModules.Flux.Store<{
@@ -102,6 +129,10 @@ export function patchFilePreviews(
 					id: target.message,
 					channel_id: target.channel,
 					attachments: message.attachments,
+					...('embeds' in message && Array.isArray(message.embeds)
+						? { embeds: message.embeds }
+						: {}),
+					...('flags' in message ? { flags: message.flags } : {}),
 				},
 			})
 		}, 0)
@@ -121,6 +152,21 @@ export function patchFilePreviews(
 				try {
 					if (!enabled(item.format)) continue
 					const read = rangeReader(item.url, download.signal)
+					if (item.format === 'mkv') {
+						const dimensions = await matroskaDimensions(read)
+						if (!active || !enabled(item.format)) continue
+						if (!dimensions) {
+							failed.add(item.key)
+							continue
+						}
+						previews.set(item.key, {
+							...dimensions,
+							mimeType: 'video/x-matroska',
+						})
+						for (const target of targets.values()) refresh(target)
+						continue
+					}
+					const format = item.format
 					let composite: Awaited<ReturnType<typeof psdComposite>> | undefined
 					if (item.quality && item.format === 'psd') {
 						try {
@@ -137,7 +183,7 @@ export function patchFilePreviews(
 					const result =
 						composite ??
 						(await (async () => {
-							const jpeg = await extractPreview(read, item.format, item.quality)
+							const jpeg = await extractPreview(read, format, item.quality)
 							return {
 								...jpeg,
 								bytes: orientJpeg(jpeg.jpeg, jpeg.orientation),
@@ -213,9 +259,21 @@ export function patchFilePreviews(
 				),
 		)
 		const extras: object[] = []
+		const existingEmbeds =
+			'embeds' in value && Array.isArray(value.embeds) ? value.embeds : []
+		const videoEmbeds: object[] = []
 		for (const raw of originals) {
 			const item = attachment(raw)
 			if (!item) continue
+			if (
+				item.format === 'mkv' &&
+				(item.filename.startsWith('SPOILER_') ||
+					('spoiler' in item.raw && item.raw.spoiler === true) ||
+					('flags' in value &&
+						typeof value.flags === 'number' &&
+						(value.flags & 4) !== 0))
+			)
+				continue
 			if (typeof channelId === 'string' && typeof messageId === 'string') {
 				targets.set(`${channelId}/${messageId}`, {
 					channel: channelId,
@@ -227,11 +285,14 @@ export function patchFilePreviews(
 				}
 			}
 			if (!enabled(item.format)) continue
-			const plan = previewPlan(readSettings(store.cache).highQualityPreviews, {
-				standard: previews.has(`${item.id}:false`),
-				high: previews.has(`${item.id}:true`),
-				standardFailed: failed.has(`${item.id}:false`),
-			})
+			const plan = previewPlan(
+				item.format !== 'mkv' && readSettings(store.cache).highQualityPreviews,
+				{
+					standard: previews.has(`${item.id}:false`),
+					high: previews.has(`${item.id}:true`),
+					standardFailed: failed.has(`${item.id}:false`),
+				},
+			)
 			const quality = plan.request === 'high'
 			const key = `${item.id}:${quality}`
 			const preview =
@@ -239,17 +300,31 @@ export function patchFilePreviews(
 					? undefined
 					: previews.get(`${item.id}:${plan.display === 'high'}`)
 			if (preview) {
-				const id = (BigInt(item.id) ^ (1n << 62n)).toString()
-				previewIds.add(id)
-				extras.push({
-					...item.raw,
-					...preview,
-					id,
-					filename: `${item.filename.startsWith('SPOILER_') ? 'SPOILER_' : ''}Preview-${item.filename}.${preview.mimeType === 'image/png' ? 'png' : 'jpg'}`,
-					content_type: preview.mimeType,
-					url: preview.uri,
-					proxy_url: preview.uri,
-				})
+				if (preview.mimeType === 'video/x-matroska') {
+					videoEmbeds.push({
+						type: 'video',
+						url: item.url,
+						provider: { name: mkvProvider },
+						video: {
+							url: item.url,
+							proxy_url: item.url,
+							width: preview.width,
+							height: preview.height,
+						},
+					})
+				} else {
+					const id = (BigInt(item.id) ^ (1n << 62n)).toString()
+					previewIds.add(id)
+					extras.push({
+						...item.raw,
+						...preview,
+						id,
+						filename: `${item.filename.startsWith('SPOILER_') ? 'SPOILER_' : ''}Preview-${item.filename}.${preview.mimeType === 'image/png' ? 'png' : 'jpg'}`,
+						content_type: preview.mimeType,
+						url: preview.uri,
+						proxy_url: preview.uri,
+					})
+				}
 			}
 			if (
 				plan.request !== undefined &&
@@ -257,7 +332,7 @@ export function patchFilePreviews(
 				!failed.has(key) &&
 				pending.size < 32 &&
 				previews.size < 64 &&
-				cachedBytes < 48 * 1024 * 1024
+				(item.format === 'mkv' || cachedBytes < 48 * 1024 * 1024)
 			) {
 				pending.add(key)
 				queue.push({ ...item, quality, key })
@@ -265,6 +340,13 @@ export function patchFilePreviews(
 			}
 		}
 		value.attachments = [...extras, ...originals]
+		if (videoEmbeds.length || existingEmbeds.some(isMkvPreview))
+			Object.assign(value, {
+				embeds: [
+					...existingEmbeds.filter(embed => !isMkvPreview(embed)),
+					...videoEmbeds,
+				],
+			})
 	}
 	const changed = () => {
 		failed.clear()
@@ -327,13 +409,19 @@ export function patchFilePreviews(
 					id: target.message,
 					channel_id: target.channel,
 					attachments: originals,
+					...('embeds' in message &&
+					Array.isArray(message.embeds) &&
+					message.embeds.some(isMkvPreview)
+						? { embeds: message.embeds.filter(embed => !isMkvPreview(embed)) }
+						: {}),
 				},
 			})
 		}
 		for (const preview of previews.values())
-			void FileModule.removeFile(
-				'cache',
-				`${cacheFolder}/${preview.filename}`,
-			).catch(reportError)
+			if (preview.mimeType !== 'video/x-matroska')
+				void FileModule.removeFile(
+					'cache',
+					`${cacheFolder}/${preview.filename}`,
+				).catch(reportError)
 	})
 }

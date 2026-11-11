@@ -3,6 +3,7 @@ export type Settings = {
 	smoothZoom: boolean
 	previewPsd: boolean
 	previewNef: boolean
+	previewMkv: boolean
 	highQualityPreviews: boolean
 	rotateImages: boolean
 	rotateVideos: boolean
@@ -15,6 +16,7 @@ export const defaultSettings: Settings = {
 	smoothZoom: false,
 	previewPsd: false,
 	previewNef: false,
+	previewMkv: false,
 	highQualityPreviews: false,
 	rotateImages: true,
 	rotateVideos: true,
@@ -37,6 +39,7 @@ export function readSettings(value: unknown): Settings {
 				: 5,
 		previewPsd: 'previewPsd' in settings && settings.previewPsd === true,
 		previewNef: 'previewNef' in settings && settings.previewNef === true,
+		previewMkv: 'previewMkv' in settings && settings.previewMkv === true,
 		highQualityPreviews:
 			'highQualityPreviews' in settings &&
 			settings.highQualityPreviews === true,
