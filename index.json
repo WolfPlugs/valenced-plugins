@@ -273,6 +273,33 @@
         }
       }
     },
+    "wolfie.more-alts": {
+      "name": "More Alts!",
+      "description": "Manage and switch between multiple Discord accounts, plus unlocks Discord's own native multi-account switcher.",
+      "author": "Rosie",
+      "contributors": [
+        "Wolfie <347096063569559553> (https://wolfies.org/ \"Website\") (https://github.com/Wolfkid200444 \"GitHub\")"
+      ],
+      "icon": "ic_full_server_gating_24px",
+      "channels": {
+        "latest": "1.0.0"
+      },
+      "versions": {
+        "1.0.0": {
+          "url": "https://plugins.obamabot.me/valenced-plugins/pool/wolfie.more-alts@1.0.0.zip",
+          "sha256": "2ece413d03db119d208e199335fe2c79a740564d061b81bf22f6ee8b50ccc722",
+          "size": 13328,
+          "dependencies": {
+            "valenced.api": {
+              "version": ">=1 <2"
+            },
+            "discord": {
+              "version": "*"
+            }
+          }
+        }
+      }
+    },
     "wolfie.nsfw-blur": {
       "name": "NSFW Blur",
       "description": "Blur images and videos in NSFW channels until you tap to reveal them.",
