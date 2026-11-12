@@ -1,0 +1,25 @@
+README.md
+  s_f520838798969f::t_c4ab239788d131 5,16-21
+plugins/chat-ragdoll/index.ts
+  s_f520838798969f::t_e879735091f9cd 1-65
+plugins/chat-ragdoll/manifest.json
+  s_f520838798969f::t_22ab8d42d43f00 1-23
+plugins/chat-ragdoll/src/main/kotlin/org/wolfies/chatragdoll/ChatRagdoll.kt
+  s_f520838798969f::t_13dfabdba972eb 1-683
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "9d998172ff5f6e9c4d5dd415f363faf18da42566",
+  "prompts": {},
+  "sessions": {
+    "s_f520838798969f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1cb70-e232-7eb1-bf15-feb54deb317d",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Wolfkid200444 <32025746+Wolfkid200444@users.noreply.github.com>"
+    }
+  }
+}
