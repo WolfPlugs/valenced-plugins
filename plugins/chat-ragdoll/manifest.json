@@ -1,0 +1,23 @@
+{
+	"format": 1,
+	"id": "wolfie.chat-ragdoll",
+	"name": "Chat Ragdoll",
+	"description": "Shake your phone to drop chat into a pile. New messages launch the pile upward.",
+	"author": "Wolfie <347096063569559553> (https://wolfies.org/ \"Website\") (https://github.com/Wolfkid200444 \"GitHub\")",
+	"version": "1.0.0",
+	"dependencies": {
+		"valenced.api": {
+			"version": ">=1 <2"
+		},
+		"discord": {
+			"version": ">=351.1"
+		}
+	},
+	"dist": {
+		"script": "index.js",
+		"android": {
+			"path": "plugin.jar",
+			"class": "org.wolfies.chatragdoll.ChatRagdoll"
+		}
+	}
+}

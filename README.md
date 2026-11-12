@@ -2,7 +2,7 @@
 
 Wolfie's plugins for Valenced.
 
-AddAttachments, Better Devices, BetterInbox, Bot Client, Gif Text, Global Badges, MediaUtils, More Alts!, NSFW Blur,
+AddAttachments, Better Devices, BetterInbox, Bot Client, Chat Ragdoll, Gif Text, Global Badges, MediaUtils, More Alts!, NSFW Blur,
 PetPet, Questify, Server Info, and Sound Controls.
 
 ## Install
@@ -12,6 +12,12 @@ Add this repository in Valenced's plugin repository settings:
 https://plugins.obamabot.me/valenced-plugins
 
 Install wolf plugins, then reload Valenced.
+
+### Chat Ragdoll
+
+On Android 10 or later, shake your phone in an open chat to drop messages into a pile.
+Tilt the phone or drag and fling a fallen message to move it around. New messages
+launch the pile and stay upright until you shake again.
 
 ## Development
 
