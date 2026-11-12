@@ -11,7 +11,7 @@ import MediaOptionsIcon from './options-icon'
 import type { ReactNode } from 'react'
 import type { SettingsStore } from '../settings/config'
 
-export function MediaOptionsRow({ store }: { store: SettingsStore }) {
+function MediaOptionsRow({ store }: { store: SettingsStore }) {
 	return (
 		<Design.ActionSheetRow
 			label="Media options"

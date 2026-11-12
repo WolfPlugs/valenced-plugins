@@ -33,7 +33,7 @@ export default {
 		cleanup(closeMediaOptions)
 		patchFilePreviews(cleanup, jsonStorage, reportError)
 		patchImageEditor(cleanup, reportError)
-		patchAttachmentMenu(cleanup, reportError, jsonStorage)
+		patchAttachmentMenu(cleanup, reportError)
 		patchViewerLongPress(cleanup, reportError, jsonStorage)
 		patchZoomLimit(cleanup, () => readSettings(jsonStorage.cache).zoomEnabled)
 		patchNativeResolution(cleanup)

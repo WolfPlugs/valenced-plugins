@@ -6,14 +6,11 @@ import { Children, cloneElement, isValidElement } from 'react'
 import SearchImageIcon from '../search/search-icon'
 import { openSearch } from '../search/sheets'
 import { readMediaSource } from '../utils/media'
-import { MediaOptionsRow } from './viewer-menu'
 import type { ReactNode } from 'react'
-import type { SettingsStore } from '../settings/config'
 
 export function patchAttachmentMenu(
 	cleanup: (callback: () => void) => void,
 	reportError: (error: unknown) => void,
-	store: SettingsStore,
 ) {
 	cleanup(
 		getModules(
@@ -42,6 +39,7 @@ export function patchAttachmentMenu(
 						if (!isValidElement<{ children?: ReactNode }>(group)) return result
 						const rows = Children.toArray(group.props.children)
 						const images = sources.filter(source => source.kind === 'image')
+						if (!images.length) return result
 						const searchRows = images.map((image, index) => (
 							<Design.ActionSheetRow
 								key={`media-utils-search-${image.uri}`}
@@ -61,7 +59,6 @@ export function patchAttachmentMenu(
 							{},
 							...rows.slice(0, 2),
 							...searchRows,
-							<MediaOptionsRow key="media-utils-options" store={store} />,
 							...rows.slice(2),
 						)
 						return cloneElement(result, {}, cloneElement(sheet, {}, ...groups))
