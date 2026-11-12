@@ -133,6 +133,29 @@
         }
       }
     },
+    "wolfie.chat-ragdoll": {
+      "name": "Chat Ragdoll",
+      "description": "Shake your phone to drop chat into a pile. New messages launch the pile upward.",
+      "author": "Wolfie <347096063569559553> (https://wolfies.org/ \"Website\") (https://github.com/Wolfkid200444 \"GitHub\")",
+      "channels": {
+        "latest": "1.0.0"
+      },
+      "versions": {
+        "1.0.0": {
+          "url": "https://plugins.obamabot.me/valenced-plugins/pool/wolfie.chat-ragdoll@1.0.0.zip",
+          "sha256": "7ef52e5a1a166bae66768101b114767ec5e2b4a9b5dcc985b518104a26aaf570",
+          "size": 25459,
+          "dependencies": {
+            "valenced.api": {
+              "version": ">=1 <2"
+            },
+            "discord": {
+              "version": ">=351.1"
+            }
+          }
+        }
+      }
+    },
     "wolfie.gif-text": {
       "name": "Gif Text",
       "description": "Add GIF links or file attachments to your message draft, with configurable picker actions.",
