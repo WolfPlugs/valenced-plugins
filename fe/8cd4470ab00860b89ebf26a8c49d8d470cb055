@@ -1,0 +1,25 @@
+plugins/media-utils/menus/attachment-menu.tsx
+  s_b406fcc1c9ec1a::t_e245d7211a165c 42
+plugins/media-utils/manifest.json
+  s_b406fcc1c9ec1a::t_e100f7c0a24e89 8
+plugins/media-utils/menus/viewer-menu.tsx
+  s_b406fcc1c9ec1a::t_e245d7211a165c 14
+plugins/media-utils/index.tsx
+  s_b406fcc1c9ec1a::t_e245d7211a165c 36
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "fe8cd4470ab00860b89ebf26a8c49d8d470cb055",
+  "prompts": {},
+  "sessions": {
+    "s_b406fcc1c9ec1a": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1804e-2726-7df3-9724-bbf44180097b",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Wolfkid200444 <32025746+Wolfkid200444@users.noreply.github.com>"
+    }
+  }
+}
