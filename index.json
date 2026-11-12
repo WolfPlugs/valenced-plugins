@@ -226,7 +226,7 @@
       "author": "Wolfie <347096063569559553> (https://wolfies.org/ \"Website\") (https://github.com/Wolfkid200444 \"GitHub\")",
       "icon": "ImageIcon",
       "channels": {
-        "latest": "1.3.0"
+        "latest": "1.3.1"
       },
       "versions": {
         "1.0.0": {
@@ -311,6 +311,19 @@
           "url": "https://plugins.obamabot.me/valenced-plugins/pool/wolfie.media-utils@1.3.0.zip",
           "sha256": "46b9b9b192c913672594c0a5adc7271ccb3918b054280ccb58fa40ec7d4a3cdc",
           "size": 97624,
+          "dependencies": {
+            "valenced.api": {
+              "version": ">=1 <2"
+            },
+            "discord": {
+              "version": ">=351.1"
+            }
+          }
+        },
+        "1.3.1": {
+          "url": "https://plugins.obamabot.me/valenced-plugins/pool/wolfie.media-utils@1.3.1.zip",
+          "sha256": "5336a047b30baef1e7ffe836e46bf8b26681dd7eaa48cba6be5d34e67e0fdb56",
+          "size": 97698,
           "dependencies": {
             "valenced.api": {
               "version": ">=1 <2"
