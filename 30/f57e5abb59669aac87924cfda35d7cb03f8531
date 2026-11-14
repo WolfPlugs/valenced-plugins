@@ -1,0 +1,59 @@
+plugins/questify/completion/controller.ts
+  s_d077369cb9739e::t_f075a4e9328279 19,164,171
+  s_d077369cb9739e::t_89e7c0490a31f1 22,38,88,91-94,102-104
+  s_d077369cb9739e::t_5a9b6e39319c2c 89-90,95-101,283
+  s_d077369cb9739e::t_5a53b8ae69f068 263-268
+plugins/questify/index.ts
+  s_d077369cb9739e::t_f075a4e9328279 6,18
+plugins/questify/patches/quest-http.ts
+  s_d077369cb9739e::t_035e9adcfbf466 3-4,7-8
+  s_d077369cb9739e::t_f075a4e9328279 1-2,5-6,9-28
+plugins/questify/manifest.json
+  s_d077369cb9739e::t_1934162b495259 9
+plugins/questify/completion/service.ts
+  s_d077369cb9739e::t_f075a4e9328279 14,76,97,116,162-176
+  s_d077369cb9739e::t_5a9b6e39319c2c 11
+  s_d077369cb9739e::t_81be1406d7e50c 1,138-145,152-156
+  s_d077369cb9739e::t_89e7c0490a31f1 110,127-128,148-151,159-161
+  s_d077369cb9739e::t_5a09e9be06f484 129-137,146-147
+  s_d077369cb9739e::t_2f9af30aea3ea8 124-125,178
+plugins/questify/completion/requests.ts
+  s_d077369cb9739e::t_5a9b6e39319c2c 38-41,57-59
+  s_d077369cb9739e::t_035e9adcfbf466 37,43-52,60-80
+  s_d077369cb9739e::t_89e7c0490a31f1 54-56
+plugins/questify/patches/menus.tsx
+  s_d077369cb9739e::t_f075a4e9328279 43
+plugins/questify/completion/achievement.ts
+  s_d077369cb9739e::t_89e7c0490a31f1 1-9,17-21,26-37,43-47,50,53-55,68-73,76-78,113-115,119-121,131-132,144-148,154-155,159-162,164
+  s_d077369cb9739e::t_5a9b6e39319c2c 22-25,38-42,48-49,51-52,56-67,101-112,116-118,124-128,130,134,149-153,157-158
+  s_d077369cb9739e::t_5a09e9be06f484 10-16,79-85,92-93,97,99,129
+  s_d077369cb9739e::t_5a53b8ae69f068 74-75,100,122-123,143,156,163
+  s_d077369cb9739e::t_81be1406d7e50c 86-91,94-96,98,133,135-142
+plugins/questify/settings/index.tsx
+  s_d077369cb9739e::t_89e7c0490a31f1 259
+  s_d077369cb9739e::t_509ce5f40f089d 201-205
+tests/questify-achievement.test.ts
+  s_d077369cb9739e::t_509ce5f40f089d 1-48
+tests/questify-http.test.ts
+  s_d077369cb9739e::t_035e9adcfbf466 1-40
+plugins/questify/src/main/kotlin/org/wolfies/questify/Questify.kt
+  s_d077369cb9739e::t_5a09e9be06f484 10,38,40-42,57
+  s_d077369cb9739e::t_5a9b6e39319c2c 29-37,43-56,58-89
+  s_d077369cb9739e::t_81be1406d7e50c 39
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "30f57e5abb59669aac87924cfda35d7cb03f8531",
+  "prompts": {},
+  "sessions": {
+    "s_d077369cb9739e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1900d-a660-7982-a75b-d5dd91c11334",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Wolfkid200444 <32025746+Wolfkid200444@users.noreply.github.com>"
+    }
+  }
+}
