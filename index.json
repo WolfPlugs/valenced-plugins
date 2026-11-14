@@ -419,7 +419,7 @@
       ],
       "icon": "QuestsIcon",
       "channels": {
-        "latest": "1.0.2"
+        "latest": "1.0.3"
       },
       "versions": {
         "1.0.0": {
@@ -452,6 +452,19 @@
           "url": "https://plugins.obamabot.me/valenced-plugins/pool/wolfie.questify@1.0.2.zip",
           "sha256": "f7f036fcd78f3346d4e450ac274c6df9bbaa92dddcb63353dc77078bd4738dd3",
           "size": 17595,
+          "dependencies": {
+            "valenced.api": {
+              "version": ">=1 <2"
+            },
+            "discord": {
+              "version": "*"
+            }
+          }
+        },
+        "1.0.3": {
+          "url": "https://plugins.obamabot.me/valenced-plugins/pool/wolfie.questify@1.0.3.zip",
+          "sha256": "e38eacf53dcca931f2ccc179f0f11600ddfa543c6b7a9153fe819e6c89e24196",
+          "size": 21671,
           "dependencies": {
             "valenced.api": {
               "version": ">=1 <2"
