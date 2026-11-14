@@ -16,8 +16,10 @@ export type CompletionAdapter = {
 	heartbeat(
 		id: string,
 		applicationId: string,
+		taskName: string,
 		terminal: boolean,
 	): Promise<unknown>
+	achievement?(quest: Quest, task: Task, active: () => boolean): Promise<void>
 	now(): number
 	wallNow?(): number
 	options?(): { simultaneous: boolean; accelerateVideo: boolean }
@@ -33,6 +35,7 @@ export function completionTask(quest: Quest): Task | undefined {
 				'WATCH_VIDEO_ON_MOBILE',
 				'PLAY_ON_DESKTOP',
 				'PLAY_ACTIVITY',
+				'ACHIEVEMENT_IN_ACTIVITY',
 			].includes(task.name) && task.progress < task.target,
 	)
 }
@@ -82,6 +85,23 @@ export function createCompletionController(adapter: CompletionAdapter) {
 			throw new Error(
 				'This quest type is not supported by this Discord version.',
 			)
+		if (task.name === 'ACHIEVEMENT_IN_ACTIVITY') {
+			if (!adapter.achievement)
+				throw new Error('Activity achievement completion is unavailable.')
+			await adapter.achievement(quest, task, () => valid(entry))
+			if (!valid(entry)) return
+			const updated = adapter.quest(id)
+			if (updated?.status !== 'completed' && updated?.status !== 'claimed')
+				throw new Error(
+					'Discord has not confirmed the achievement yet. Refresh Quests to check progress.',
+				)
+			entry.state = {
+				kind: 'completed',
+				message: 'Completed. Claim your reward in Discord.',
+			}
+			emit()
+			return
+		}
 		const accelerated =
 			adapter.options?.().accelerateVideo &&
 			(task.name === 'WATCH_VIDEO' || task.name === 'WATCH_VIDEO_ON_MOBILE') &&
@@ -141,14 +161,14 @@ export function createCompletionController(adapter: CompletionAdapter) {
 			} else {
 				if (!task.applicationId)
 					throw new Error('Quest application is unavailable.')
-				await adapter.heartbeat(id, task.applicationId, false)
+				await adapter.heartbeat(id, task.applicationId, task.name, false)
 			}
 			if (!valid(entry)) break
 			await adapter.wait(1000, entry.abort.signal)
 			const updated = adapter.quest(id)
 			if (updated?.status === 'completed' || updated?.status === 'claimed') {
 				if (!video && task.applicationId && valid(entry))
-					await adapter.heartbeat(id, task.applicationId, true)
+					await adapter.heartbeat(id, task.applicationId, task.name, true)
 				if (!valid(entry)) break
 				entry.state = {
 					kind: 'completed',
@@ -240,6 +260,12 @@ export function createCompletionController(adapter: CompletionAdapter) {
 		reschedule: schedule,
 		pending() {
 			return [...entries]
+				.filter(([id]) => {
+					const quest = adapter.quest(id)
+					return (
+						!quest || completionTask(quest)?.name !== 'ACHIEVEMENT_IN_ACTIVITY'
+					)
+				})
 				.filter(
 					([, entry]) =>
 						entry.state.kind === 'queued' || entry.state.kind === 'running',
@@ -254,6 +280,7 @@ export function createCompletionController(adapter: CompletionAdapter) {
 						'WATCH_VIDEO_ON_MOBILE',
 						'PLAY_ON_DESKTOP',
 						'PLAY_ACTIVITY',
+						'ACHIEVEMENT_IN_ACTIVITY',
 					].includes(task.name) && adapter.supports(task),
 			)
 		},

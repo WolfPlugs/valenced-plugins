@@ -6,7 +6,7 @@
 	"author": "Wolfie <347096063569559553> (https://wolfies.org/ \"Website\") (https://github.com/Wolfkid200444 \"GitHub\")",
 	"contributors": ["dxckiee <772390964471791630>"],
 	"icon": "QuestsIcon",
-	"version": "1.0.2",
+	"version": "1.0.3",
 	"dependencies": {
 		"valenced.api": {
 			"version": ">=1 <2"

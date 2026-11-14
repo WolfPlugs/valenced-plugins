@@ -34,45 +34,48 @@ export async function callQuestAction(
 	}
 }
 
-type QuestDispatcher = {
-	subscribe(event: string, listener: (payload: unknown) => void): void
-	unsubscribe(event: string, listener: (payload: unknown) => void): void
+type Intercept = (response: unknown, retry: unknown, cancel: unknown) => boolean
+export type QuestHTTPOptions = {
+	url: string
+	body?: unknown
+	interceptResponse?: Intercept
+}
+export function protectQuestRequest(
+	method: 'get' | 'post',
+	options: QuestHTTPOptions,
+): QuestHTTPOptions {
+	if (
+		!(method === 'get'
+			? /^\/quests\/@me(?:\?|$)/.test(options.url)
+			: /^\/quests\/\d+\/video-progress(?:\?|$)/.test(options.url))
+	)
+		return options
+
+	return protectUnauthorized(options)
 }
 
-export function callQuestHeartbeat(
-	dispatcher: QuestDispatcher,
-	questId: string,
-	send: () => Promise<unknown>,
-): Promise<void> {
-	return new Promise((resolve, reject) => {
-		let settled = false
-		const finish = (error?: Error) => {
-			if (settled) return
-			settled = true
-			clearTimeout(timer)
-			dispatcher.unsubscribe('QUESTS_SEND_HEARTBEAT_SUCCESS', success)
-			dispatcher.unsubscribe('QUESTS_SEND_HEARTBEAT_FAILURE', failure)
-			if (error) reject(error)
-			else resolve()
-		}
-		const success = (payload: unknown) => {
-			if (record(payload) && payload.questId === questId) finish()
-		}
-		const failure = (payload: unknown) => {
-			if (record(payload) && payload.questId === questId)
-				finish(questRequestError(payload.error))
-		}
-		const timer = setTimeout(
-			() =>
-				finish(new Error('Discord did not acknowledge this quest heartbeat.')),
-			15000,
-		)
-		dispatcher.subscribe('QUESTS_SEND_HEARTBEAT_SUCCESS', success)
-		dispatcher.subscribe('QUESTS_SEND_HEARTBEAT_FAILURE', failure)
-		try {
-			void send().catch(error => finish(questRequestError(error)))
-		} catch (error) {
-			finish(questRequestError(error))
-		}
-	})
+export function protectUnauthorized(
+	options: QuestHTTPOptions,
+): QuestHTTPOptions {
+	return {
+		...options,
+		interceptResponse(response, retry, cancel) {
+			if (
+				typeof response === 'object' &&
+				response !== null &&
+				'status' in response &&
+				response.status === 401 &&
+				typeof cancel === 'function'
+			) {
+				cancel(
+					Object.assign(new Error('Unauthorized'), {
+						status: 401,
+						body: 'body' in response ? response.body : undefined,
+					}),
+				)
+				return true
+			}
+			return options.interceptResponse?.(response, retry, cancel) ?? false
+		},
+	}
 }

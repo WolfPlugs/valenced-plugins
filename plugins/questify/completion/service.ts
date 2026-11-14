@@ -1,4 +1,4 @@
-import { Dispatcher } from '@valenced/discord/common/flux'
+import { ToastActionCreators } from '@valenced/discord/actions'
 import { Stores } from '@valenced/discord/flux'
 import { lookupModuleWithImportedPath } from '@valenced/discord/utils/modules/finders'
 import { lookupModule } from '@valenced/modules/finders'
@@ -8,9 +8,10 @@ import { AppState } from 'react-native'
 import { currentAccount, readQuests, refreshQuests } from '../quests/store'
 import { defaults } from '../settings/config'
 import { completionAllowed } from '../settings/warning-policy'
+import { completeActivityAchievement } from './achievement'
 import { createCompletionController } from './controller'
 import { sendDesktopHeartbeat } from './desktop-heartbeat'
-import { callQuestAction, callQuestHeartbeat } from './requests'
+import { callQuestAction } from './requests'
 import type { Settings } from '../settings/config'
 
 let settings = defaults
@@ -72,7 +73,7 @@ function wait(ms: number, signal: AbortSignal): Promise<void> {
 		signal.addEventListener('abort', abort, { once: true })
 	})
 }
-async function request(action: () => Promise<unknown>) {
+async function request(stage: string, action: () => Promise<unknown>) {
 	let timer: ReturnType<typeof setTimeout> | undefined
 	try {
 		return await Promise.race([
@@ -93,7 +94,7 @@ async function request(action: () => Promise<unknown>) {
 		// Report only the formatted error, never request headers or raw responses.
 		const message =
 			error instanceof Error ? error.message : 'Quest request failed.'
-		reportRequestError?.(new Error(`[Questify request] ${message}`))
+		reportRequestError?.(new Error(`[Questify ${stage}] ${message}`))
 		throw error
 	} finally {
 		clearTimeout(timer)
@@ -106,14 +107,13 @@ export const completion = createCompletionController({
 	foreground: () => AppState.currentState === 'active',
 	quest: id => readQuests().quests.find(quest => quest.id === id),
 	supports: task =>
-		!!actions() &&
-		(task.name.startsWith('WATCH_VIDEO') || !!task.applicationId),
+		task.name.startsWith('WATCH_VIDEO') ? !!actions() : !!task.applicationId,
 	options: () => settings,
 	now: () => performance.now(),
 	wallNow: () => Date.now(),
 	wait,
 	video: (id, progress) =>
-		request(async () => {
+		request('video progress', async () => {
 			const api = actions()
 			if (!api)
 				throw new Error('Quest actions are unavailable. Open Quests first.')
@@ -121,39 +121,60 @@ export const completion = createCompletionController({
 			const task = readQuests()
 				.quests.find(quest => quest.id === id)
 				?.tasks.find(task => task.name.startsWith('WATCH_VIDEO'))
-			if (task && progress >= task.target) await refreshQuests()
+			if (task && progress >= task.target)
+				await request('quest refresh', refreshQuests)
 		}),
-	heartbeat: (questId, applicationId, terminal) =>
-		request(async () => {
-			const quest = readQuests().quests.find(quest => quest.id === questId)
-			const activity = quest?.tasks.some(task => task.name === 'PLAY_ACTIVITY')
-			// Native transport keeps a 401 from tripping Discord's client-side logout.
-			if (
-				activity ||
-				quest?.tasks.some(task => task.name === 'PLAY_ON_DESKTOP')
-			) {
-				const auth = lookupModuleWithImportedPath<{
-					default: { getToken(): string | null }
-				}>('stores/AuthenticationStore.tsx')[0]?.default
-				const token = auth?.getToken()
-				if (!token)
-					throw new Error('Sign in to Discord before starting this quest.')
-				await sendDesktopHeartbeat(
-					(...args) => callNativeMethod('wolfie.questify.heartbeat', args),
-					questId,
-					applicationId,
-					terminal,
-					token,
-					activity ? activityStreamKey() : undefined,
-				)
-				await refreshQuests()
+	achievement: async (quest, task, active) => {
+		if (!task.applicationId) throw new Error('Quest Activity is unavailable.')
+		try {
+			await completeActivityAchievement(
+				task.applicationId,
+				quest.id,
+				task.target,
+				active,
+			)
+		} catch (error) {
+			reportRequestError?.(error)
+			if (active())
+				ToastActionCreators.open('QUESTIFY_ACHIEVEMENT_ERROR', {
+					text:
+						error instanceof Error
+							? error.message
+							: 'Activity achievement failed.',
+					variant: 'critical',
+				})
+			throw error
+		}
+		if (!active()) return
+		for (let attempt = 0; attempt < 3 && active(); attempt++) {
+			await request('quest refresh', refreshQuests)
+			const current = readQuests().quests.find(item => item.id === quest.id)
+			if (current?.status === 'completed' || current?.status === 'claimed') {
+				if (active())
+					ToastActionCreators.open('QUESTIFY_ACHIEVEMENT_DONE', {
+						text: 'Achievement complete. Claim your reward in Discord.',
+					})
 				return
 			}
-			const api = actions()
-			if (!api)
-				throw new Error('Quest actions are unavailable. Open Quests first.')
-			return callQuestHeartbeat(Dispatcher, questId, () =>
-				api.sendHeartbeat({ questId, applicationId, terminal }),
+			if (attempt < 2) await new Promise(resolve => setTimeout(resolve, 1500))
+		}
+	},
+	heartbeat: (questId, applicationId, taskName, terminal) =>
+		request(taskName, async () => {
+			const auth = lookupModuleWithImportedPath<{
+				default: { getToken(): string | null }
+			}>('stores/AuthenticationStore.tsx')[0]?.default
+			const token = auth?.getToken()
+			if (!token)
+				throw new Error('Sign in to Discord before starting this quest.')
+			await sendDesktopHeartbeat(
+				(...args) => callNativeMethod('wolfie.questify.heartbeat', args),
+				questId,
+				applicationId,
+				terminal,
+				token,
+				taskName === 'PLAY_ACTIVITY' ? activityStreamKey() : undefined,
 			)
+			await request('quest refresh', refreshQuests)
 		}),
 })

@@ -40,6 +40,7 @@ function completionItem(props: unknown) {
 	if (!quest || !['active', 'available'].includes(quest.status)) return
 	const state = completion.state(quest.id)
 	const active = state?.kind === 'queued' || state?.kind === 'running'
+	if (!active && !completion.canComplete(quest)) return
 	return {
 		key: 'questify-complete',
 		label: active ? 'Stop auto-completion' : 'Auto complete quest',
