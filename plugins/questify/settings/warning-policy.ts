@@ -13,6 +13,8 @@ export const SettingWarnings: Record<string, string> = {
 		'This keeps the quest video from pausing when its screen loses focus. It changes normal viewing behavior; Android may still suspend background playback.',
 	simultaneous:
 		'Several quests will send progress requests at the same time. This can trigger rate limits and does not reduce detection or account risk.',
+	backgroundRunner:
+		'A hidden web view starts with Discord and runs accepted quests from the web login, sending progress requests without another button press.',
 	resumeInterrupted:
 		'Saved quests can resume sending requests after a reload, restart, or return to Discord, without asking you to start each quest again.',
 	autoTypes:
@@ -31,6 +33,7 @@ export function displayOnlySettings(settings: Settings): Settings {
 		accelerateVideo: false,
 		preventVideoPausing: false,
 		simultaneous: false,
+		backgroundRunner: false,
 		resumeInterrupted: false,
 		autoTypes: {},
 		resumeByAccount: {},
