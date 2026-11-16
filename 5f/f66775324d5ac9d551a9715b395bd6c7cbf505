@@ -1,0 +1,27 @@
+plugins/media-utils/editor/runtime/canvas.ts
+  s_b406fcc1c9ec1a::t_060c7ad774ab12 131,385,473,542-543,545-548
+  s_b406fcc1c9ec1a::t_12097d60e792b1 244,479-495
+plugins/media-utils/editor/runtime/layer-selection.ts
+  s_b406fcc1c9ec1a::t_060c7ad774ab12 10,57,93
+  s_b406fcc1c9ec1a::t_12097d60e792b1 3-7,9,11,61,64-66,112-126
+plugins/media-utils/manifest.json
+  s_b406fcc1c9ec1a::t_a540f003e85044 8
+plugins/media-utils/editor/canvas-document.generated.ts
+  s_b406fcc1c9ec1a::t_c75486dd3f9f1e 3
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "5ff66775324d5ac9d551a9715b395bd6c7cbf505",
+  "prompts": {},
+  "sessions": {
+    "s_b406fcc1c9ec1a": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1804e-2726-7df3-9724-bbf44180097b",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Wolfkid200444 <32025746+Wolfkid200444@users.noreply.github.com>"
+    }
+  }
+}
