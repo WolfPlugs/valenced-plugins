@@ -128,7 +128,7 @@ function runtime() {
 	let selected: Layer | undefined
 	let layerDrag:
 		| {
-				action: 'move' | 'resize' | 'rotate'
+				action: 'move' | 'transform'
 				distance: number
 				angle: number
 				scale: number
@@ -241,7 +241,7 @@ function runtime() {
 			context.save()
 			context.translate(layer.x, layer.y)
 			context.rotate(layer.angle)
-			context.scale(layer.scale, layer.scale)
+			context.scale(layer.flipped ? -layer.scale : layer.scale, layer.scale)
 			if (layer.kind === 'text') drawText(context, { ...layer, x: 0, y: 0 })
 			else
 				context.drawImage(
@@ -382,7 +382,7 @@ function runtime() {
 		)
 	}
 	function startLayerDrag(
-		action: 'move' | 'resize' | 'rotate',
+		action: 'move' | 'transform',
 		layer: Layer,
 		start: Point,
 	) {
@@ -470,11 +470,28 @@ function runtime() {
 					.sort((a, b) => a.distance - b.distance)[0]
 				if (
 					handle &&
-					handle.distance < (handle.action === 'resize' ? 12 : 14) * unit
+					handle.distance < (handle.action === 'transform' ? 12 : 14) * unit
 				) {
 					if (handle.action === 'delete') {
 						layers.splice(layers.indexOf(selected), 1)
 						selected = undefined
+						finishPointer()
+					} else if (handle.action === 'copy') {
+						const offset = 20 * unit
+						const copy = {
+							...selected,
+							x:
+								selected.x +
+								(selected.x + offset < stageWidth ? offset : -offset),
+							y:
+								selected.y +
+								(selected.y + offset < stageHeight ? offset : -offset),
+						}
+						layers.push(copy)
+						selected = copy
+						finishPointer()
+					} else if (handle.action === 'flip') {
+						selected.flipped = !selected.flipped
 						finishPointer()
 					} else startLayerDrag(handle.action, selected, start)
 					scheduleDraw()
@@ -522,16 +539,13 @@ function runtime() {
 			} else {
 				const x = next.x - selected.x
 				const y = next.y - selected.y
-				if (layerDrag.action === 'rotate')
+				const distance = Math.hypot(x, y)
+				if (distance > 0.15 * layerDrag.distance)
 					selected.angle = Math.atan2(y, x) - layerDrag.angle
-				else
-					selected.scale = Math.max(
-						0.15,
-						Math.min(
-							8,
-							(layerDrag.scale * Math.hypot(x, y)) / layerDrag.distance,
-						),
-					)
+				selected.scale = Math.max(
+					0.15,
+					Math.min(8, (layerDrag.scale * distance) / layerDrag.distance),
+				)
 			}
 		}
 		last = next

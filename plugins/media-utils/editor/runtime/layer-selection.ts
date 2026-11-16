@@ -1,8 +1,14 @@
 import type { Point } from '../shared/crop-geometry'
 
-export type LayerTransform = Point & { angle: number; scale: number }
+export type LayerTransform = Point & {
+	angle: number
+	scale: number
+	flipped?: boolean
+}
 type Bounds = { width: number; height: number }
-type Handle = Point & { action: 'resize' | 'rotate' | 'delete' }
+type Handle = Point & {
+	action: 'transform' | 'copy' | 'flip' | 'delete'
+}
 
 export function layerPoint(layer: LayerTransform, x: number, y: number): Point {
 	const cos = Math.cos(layer.angle)
@@ -48,15 +54,16 @@ export function layerSelection(
 		Math.min(dimension - inset, Math.max(inset, value))
 	const inset = Math.min(width / 2, height / 2, 12 * unit)
 	const handles: Handle[] = corners.map(corner => ({
-		action: 'resize',
+		action: 'transform',
 		x: clamp(corner.x, width, inset),
 		y: clamp(corner.y, height, inset),
 	}))
-	const toolX = clamp(toolbar.x, width, Math.min(width / 2, 31 * unit))
+	const toolX = clamp(toolbar.x, width, Math.min(width / 2, 42 * unit))
 	const toolY = clamp(toolbar.y, height, inset)
 	handles.push(
-		{ action: 'rotate', x: toolX - 15 * unit, y: toolY },
-		{ action: 'delete', x: toolX + 15 * unit, y: toolY },
+		{ action: 'copy', x: toolX - 28 * unit, y: toolY },
+		{ action: 'flip', x: toolX, y: toolY },
+		{ action: 'delete', x: toolX + 28 * unit, y: toolY },
 	)
 	return { corners, handles }
 }
@@ -83,7 +90,7 @@ export function drawLayerSelection(
 		ctx.translate(x, y)
 		ctx.scale(unit, unit)
 		ctx.beginPath()
-		ctx.arc(0, 0, action === 'resize' ? 5 : 12, 0, 2 * Math.PI)
+		ctx.arc(0, 0, action === 'transform' ? 5 : 12, 0, 2 * Math.PI)
 		ctx.fillStyle = '#fff'
 		ctx.fill()
 		ctx.strokeStyle = '#17171c'
@@ -102,11 +109,21 @@ export function drawLayerSelection(
 			ctx.lineTo(-3, 5)
 			ctx.lineTo(3, 5)
 			ctx.lineTo(4, -1)
-		} else if (action === 'rotate') {
-			ctx.arc(0, 0, 5, -Math.PI / 2, Math.PI)
-			ctx.moveTo(-7, -2)
-			ctx.lineTo(-5, 1)
-			ctx.lineTo(-2, -1)
+		} else if (action === 'copy') {
+			ctx.rect(-5, -2, 7, 8)
+			ctx.moveTo(-2, -4)
+			ctx.lineTo(-2, -6)
+			ctx.lineTo(5, -6)
+			ctx.lineTo(5, 2)
+		} else if (action === 'flip') {
+			ctx.moveTo(0, -6)
+			ctx.lineTo(0, 6)
+			ctx.moveTo(-3, -4)
+			ctx.lineTo(-7, 0)
+			ctx.lineTo(-3, 4)
+			ctx.moveTo(3, -4)
+			ctx.lineTo(7, 0)
+			ctx.lineTo(3, 4)
 		}
 		ctx.stroke()
 		ctx.restore()
