@@ -1,0 +1,19 @@
+plugins/media-utils/editor/image/emoji-drawer.tsx
+  s_b406fcc1c9ec1a::t_04d463d557b477 72-85,100-102,113,170
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "0879752022bc512e7bd776387a938414d1680d3e",
+  "prompts": {},
+  "sessions": {
+    "s_b406fcc1c9ec1a": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1804e-2726-7df3-9724-bbf44180097b",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Wolfkid200444 <32025746+Wolfkid200444@users.noreply.github.com>"
+    }
+  }
+}
