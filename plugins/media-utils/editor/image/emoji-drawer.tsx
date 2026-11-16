@@ -5,51 +5,6 @@ import { EditorIconButton } from '../shared/editor-icon'
 import { getEditorEmojis } from './editor-emojis'
 
 export type EditorEmoji = string | { id: string; name: string }
-const faces = [
-	['😀', 'grin'],
-	['😄', 'smile'],
-	['😁', 'grin'],
-	['😆', 'laugh'],
-	['😂', 'laugh tears'],
-	['🤣', 'laugh rofl'],
-	['😊', 'blush smile'],
-	['🙂', 'smile'],
-	['🙃', 'upside down'],
-	['😉', 'wink'],
-	['😍', 'heart eyes'],
-	['🥰', 'love'],
-	['😘', 'kiss'],
-	['😎', 'sunglasses cool'],
-	['🤩', 'star eyes'],
-	['🥳', 'party'],
-	['😭', 'cry sob'],
-	['🥺', 'pleading'],
-	['😢', 'sad cry'],
-	['😅', 'sweat smile'],
-	['🤔', 'thinking'],
-	['🙄', 'eye roll'],
-	['😴', 'sleep'],
-	['😡', 'angry'],
-	['😱', 'scream'],
-	['💀', 'skull'],
-	['👀', 'eyes'],
-	['❤️', 'red heart'],
-	['💜', 'purple heart'],
-	['💙', 'blue heart'],
-	['👍', 'thumbs up'],
-	['👎', 'thumbs down'],
-	['👋', 'wave'],
-	['🙌', 'hands'],
-	['🙏', 'pray thanks'],
-	['🤝', 'handshake'],
-	['🔥', 'fire'],
-	['⭐', 'star'],
-	['✨', 'sparkles'],
-	['🎉', 'party confetti'],
-	['💯', 'hundred'],
-	['✅', 'check'],
-	['❌', 'cross'],
-]
 const cellId = (emoji: EditorEmoji) =>
 	typeof emoji === 'string' ? emoji : emoji.id
 
@@ -114,7 +69,20 @@ export function EmojiDrawer({
 			reportError(error)
 		}
 	}, [])
-	const search = query.trim().toLowerCase()
+	const input = query.trim()
+	const search = input.toLowerCase()
+	// Offer a pasted symbol as a single insertable item, without a built-in catalog.
+	const pastedEmoji =
+		/^[^\s -~]+$/.test(input) &&
+		Array.from(input).some(character => {
+			const code = character.codePointAt(0) ?? 0
+			return (
+				(code >= 0x1f000 && code <= 0x1faff) ||
+				(code >= 0x2300 && code <= 0x27ff)
+			)
+		})
+			? input
+			: undefined
 	const sections = useMemo(() => {
 		function section(key: string, title: string, emojis: EditorEmoji[]) {
 			const data: GridRow[] = []
@@ -129,15 +97,9 @@ export function EmojiDrawer({
 			...(!search && recent.length
 				? [section('recent', 'Recently used', recent)]
 				: []),
-			section(
-				'unicode',
-				'Emoji',
-				faces
-					.filter(
-						([emoji, name]) => emoji.includes(search) || name.includes(search),
-					)
-					.map(([emoji]) => emoji),
-			),
+			...(pastedEmoji
+				? [section('unicode', 'Pasted emoji', [pastedEmoji])]
+				: []),
 			...servers.map(server =>
 				section(
 					server.id,
@@ -148,7 +110,7 @@ export function EmojiDrawer({
 				),
 			),
 		].filter(group => group.data.length)
-	}, [recent, search, servers])
+	}, [pastedEmoji, recent, search, servers])
 	return (
 		<View
 			style={[StyleSheet.absoluteFill, { zIndex: 10 }]}
@@ -205,7 +167,7 @@ export function EmojiDrawer({
 				<Design.TextInput
 					value={query}
 					onChange={setQuery}
-					placeholder="Find the perfect emoji"
+					placeholder="Search server emoji or paste an emoji"
 				/>
 				<SectionList<GridRow>
 					sections={sections}
