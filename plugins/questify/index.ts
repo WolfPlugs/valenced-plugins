@@ -3,10 +3,15 @@ import { AppState } from 'react-native'
 import { startCompletionLifecycle } from './completion/lifecycle'
 import { patchQuestLists } from './patches/lists'
 import { patchQuestMenu } from './patches/menus'
+import {
+	startBackgroundRunner,
+	stopBackgroundRunner,
+} from './webrunner/background'
 import { patchQuestHTTP } from './patches/quest-http'
 import { currentAccount, readQuests } from './quests/store'
 import { defaults, normalizeSettings } from './settings/config'
 import SettingsComponent from './settings/index'
+import { completionAllowed } from './settings/warning-policy'
 import { scheduleStartupWarning } from './settings/warnings'
 import type { QuestStatus } from './quests/model'
 import type { Settings } from './settings/config'
@@ -19,6 +24,15 @@ export default plugin<{ jsonStorage: Settings }>({
 		startCompletionLifecycle(cleanup, jsonStorage, error =>
 			plugin.reportError(error),
 		)
+		const autoStart = setTimeout(() => {
+			const saved = normalizeSettings(jsonStorage.cache)
+			if (completionAllowed(saved) && saved.backgroundRunner)
+				startBackgroundRunner()
+		}, 3000)
+		cleanup(() => {
+			clearTimeout(autoStart)
+			stopBackgroundRunner()
+		})
 		patchQuestMenu(cleanup)
 		if (plugin.startedLate) plugin.requireReload()
 		else patchQuestLists(cleanup, () => normalizeSettings(jsonStorage.use()))

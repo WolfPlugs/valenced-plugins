@@ -7,6 +7,7 @@ import {
 	completion,
 	configureCompletion,
 	setCompletionErrorReporter,
+	setRequestLog,
 } from './service'
 import { resumableQuests, savedQuestIds, shouldAutoComplete } from './state'
 import type { JsonStorage } from '@valenced/json-storage'
@@ -19,6 +20,11 @@ export function startCompletionLifecycle(
 ) {
 	setCompletionErrorReporter(reportError)
 	cleanup(() => setCompletionErrorReporter())
+	setRequestLog(
+		requestLog => void storage.set({ requestLog }).catch(reportError),
+		normalizeSettings(storage.cache).requestLog,
+	)
+	cleanup(() => setRequestLog())
 	let settings = normalizeSettings(storage.cache)
 	let account: string | undefined
 	let pendingResume = new Set<string>()
@@ -60,7 +66,12 @@ export function startCompletionLifecycle(
 	const unsubscribeCompletion = completion.subscribe(save)
 	cleanup(
 		storage.subscribe(() => {
-			settings = normalizeSettings(storage.cache)
+			const next = normalizeSettings(storage.cache)
+			const logOnly =
+				JSON.stringify({ ...next, requestLog: '' }) ===
+				JSON.stringify({ ...settings, requestLog: '' })
+			settings = next
+			if (logOnly) return
 			if (!settings.resumeInterrupted) pendingResume.clear()
 			configureCompletion(settings)
 			save()

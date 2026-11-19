@@ -15,6 +15,20 @@ import { callQuestAction } from './requests'
 import type { Settings } from '../settings/config'
 
 let settings = defaults
+let requestLog: string[] = []
+let writeRequestLog: ((log: string) => void) | undefined
+// Debug aid: persisted so it can be read after Discord logs the user out.
+export function setRequestLog(write?: (log: string) => void, initial = '') {
+	writeRequestLog = write
+	requestLog = initial ? initial.split('\n') : []
+}
+export function logRequest(line: string) {
+	requestLog = [
+		...requestLog.slice(-7),
+		`${new Date().toTimeString().slice(0, 8)} ${line}`,
+	]
+	writeRequestLog?.(requestLog.join('\n'))
+}
 let reportRequestError: ((error: unknown) => void) | undefined
 export function setCompletionErrorReporter(
 	reporter?: (error: unknown) => void,
@@ -45,14 +59,13 @@ function actions() {
 		),
 	)[0]
 }
-// Any voice channel works as the stream key target, same as the desktop quest scripts.
+// Every non-video quest heartbeats with a call stream key (any DM or voice channel works), like Qwester.
 function activityStreamKey(): string {
 	const channels = Stores.ChannelStore as
 		| { getSortedPrivateChannels?(): { id: string }[] }
 		| undefined
 	const id = channels?.getSortedPrivateChannels?.()[0]?.id
-	if (!id)
-		throw new Error('Open a DM or voice channel before starting this quest.')
+	if (!id) throw new Error('Open a DM or voice channel before starting this quest.')
 	return `call:${id}:1`
 }
 function wait(ms: number, signal: AbortSignal): Promise<void> {
@@ -73,10 +86,11 @@ function wait(ms: number, signal: AbortSignal): Promise<void> {
 		signal.addEventListener('abort', abort, { once: true })
 	})
 }
-async function request(stage: string, action: () => Promise<unknown>) {
+async function request(label: string, action: () => Promise<unknown>) {
 	let timer: ReturnType<typeof setTimeout> | undefined
+	logRequest(`${label} sending`)
 	try {
-		return await Promise.race([
+		const result = await Promise.race([
 			action(),
 			new Promise<never>((_, reject) => {
 				timer = setTimeout(
@@ -90,11 +104,14 @@ async function request(stage: string, action: () => Promise<unknown>) {
 				)
 			}),
 		])
+		logRequest(`${label} ok`)
+		return result
 	} catch (error) {
 		// Report only the formatted error, never request headers or raw responses.
 		const message =
 			error instanceof Error ? error.message : 'Quest request failed.'
-		reportRequestError?.(new Error(`[Questify ${stage}] ${message}`))
+		logRequest(`${label} failed: ${message}`)
+		reportRequestError?.(new Error(`[Questify request] ${message}`))
 		throw error
 	} finally {
 		clearTimeout(timer)
@@ -106,14 +123,20 @@ export const completion = createCompletionController({
 	account: currentAccount,
 	foreground: () => AppState.currentState === 'active',
 	quest: id => readQuests().quests.find(quest => quest.id === id),
+	// Desktop-game heartbeats from the app got the account logged out; the web runner
+	// handles them.
 	supports: task =>
-		task.name.startsWith('WATCH_VIDEO') ? !!actions() : !!task.applicationId,
+		task.name === 'PLAY_ON_DESKTOP'
+			? false
+			: task.name.startsWith('WATCH_VIDEO')
+				? !!actions()
+				: !!task.applicationId,
 	options: () => settings,
 	now: () => performance.now(),
 	wallNow: () => Date.now(),
 	wait,
 	video: (id, progress) =>
-		request('video progress', async () => {
+		request(`video ${id}`, async () => {
 			const api = actions()
 			if (!api)
 				throw new Error('Quest actions are unavailable. Open Quests first.')
@@ -160,7 +183,13 @@ export const completion = createCompletionController({
 		}
 	},
 	heartbeat: (questId, applicationId, taskName, terminal) =>
-		request(taskName, async () => {
+		request(`heartbeat ${taskName}`, async () => {
+			// Desktop-game heartbeats got the app logged out in testing; only activity
+			// quests are known safe. Games run through the web runner instead.
+			if (taskName !== 'PLAY_ACTIVITY')
+				throw new Error(
+					'Only activity quests can run here. Use Settings > Web quest runner > Run quests.',
+				)
 			const auth = lookupModuleWithImportedPath<{
 				default: { getToken(): string | null }
 			}>('stores/AuthenticationStore.tsx')[0]?.default
