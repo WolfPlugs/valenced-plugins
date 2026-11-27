@@ -19,6 +19,16 @@ export const Providers = {
 }
 
 export type ModStyle = 'none' | 'prefix' | 'suffix'
+export type Animation = 'all' | 'none'
+
+const AnimatedUrl = /\.(gif|apng)(\?|#|$)|[?&]animated=true/i
+
+// Animated images play at full speed in a native image view, and a profile
+// full of them is slow. A still of the first frame, scaled to badge size, is
+// what a limited profile loads instead
+function stillUrl(url: string) {
+	return `https://wsrv.nl/?url=${encodeURIComponent(url)}&output=png&w=64`
+}
 
 export interface Settings {
 	left: boolean
@@ -27,6 +37,7 @@ export interface Settings {
 	updateOnMetered?: boolean
 	lastFetched?: number
 	showModStyle: ModStyle
+	animation: Animation
 	providers: Partial<Record<keyof typeof Providers, boolean>>
 }
 
@@ -35,6 +46,7 @@ export const DefaultSettings: Settings = {
 	showAll: false,
 	badgeOrder: {},
 	showModStyle: 'none',
+	animation: 'all',
 	providers: {},
 }
 
@@ -47,6 +59,8 @@ export interface Badge {
 export interface BadgeProps {
 	id: string
 	source: { uri: string }
+	// The badge as published, animated. The badges screen shows this one
+	original: string
 	label: string
 	userId: string
 }
@@ -88,11 +102,64 @@ export function createBadgeStore() {
 	let version = 0
 	const listeners = new Set<() => void>()
 	const props = new Map<string, BadgeProps>()
+	// A profile asks for the same user's badges on every render
+	const results = new Map<string, unknown[]>()
 
 	function notify() {
 		props.clear()
+		results.clear()
 		version++
 		for (const listener of listeners) listener()
+	}
+
+	function build(original: unknown[], userId: string) {
+		const native = original.filter(
+			badge =>
+				!isRecord(badge) ||
+				typeof badge.id !== 'string' ||
+				!badge.id.startsWith('gb-'),
+		)
+		const badges = []
+		for (const badge of users.get(userId) ?? []) {
+			const provider = Object.entries(Providers).find(
+				([key]) => key === badge.mod,
+			)
+			if (
+				provider &&
+				settings.providers[provider[0] as keyof typeof Providers] === false
+			)
+				continue
+			const name = provider?.[1] ?? badge.mod
+			const label =
+				settings.showModStyle === 'prefix'
+					? `${name} - ${badge.tooltip}`
+					: settings.showModStyle === 'suffix'
+						? `${badge.tooltip} - ${name}`
+						: badge.tooltip
+			const id = `gb-${userId}-${encodeURIComponent(`${badge.mod}:${badge.badge}`)}`
+			let uri = badge.badge
+			if (settings.animation === 'none' && AnimatedUrl.test(uri))
+				uri = stillUrl(uri)
+			props.set(id, {
+				id,
+				userId,
+				source: { uri },
+				original: badge.badge,
+				label,
+			})
+			badges.push({
+				id,
+				description: label,
+				icon: 'dummy',
+				iconSrc: uri,
+			})
+		}
+		if (!badges.length)
+			return native.length === original.length ? original : native
+		return orderBadges(
+			settings.left ? [...badges, ...native] : [...native, ...badges],
+			settings.badgeOrder[userId] ?? [],
+		)
 	}
 
 	return {
@@ -111,44 +178,15 @@ export function createBadgeStore() {
 		},
 		getProps: (id: string) => props.get(id),
 		addBadges(original: unknown[], userId: string) {
-			const native = original.filter(
-				badge =>
-					!isRecord(badge) ||
-					typeof badge.id !== 'string' ||
-					!badge.id.startsWith('gb-'),
-			)
-			const badges = []
-			for (const badge of users.get(userId) ?? []) {
-				const provider = Object.entries(Providers).find(
-					([key]) => key === badge.mod,
-				)
-				if (
-					provider &&
-					settings.providers[provider[0] as keyof typeof Providers] === false
-				)
-					continue
-				const name = provider?.[1] ?? badge.mod
-				const label =
-					settings.showModStyle === 'prefix'
-						? `${name} - ${badge.tooltip}`
-						: settings.showModStyle === 'suffix'
-							? `${badge.tooltip} - ${name}`
-							: badge.tooltip
-				const id = `gb-${userId}-${encodeURIComponent(`${badge.mod}:${badge.badge}`)}`
-				props.set(id, { id, userId, source: { uri: badge.badge }, label })
-				badges.push({
-					id,
-					description: label,
-					icon: 'dummy',
-					iconSrc: badge.badge,
-				})
-			}
-			if (!badges.length)
-				return native.length === original.length ? original : native
-			return orderBadges(
-				settings.left ? [...badges, ...native] : [...native, ...badges],
-				settings.badgeOrder[userId] ?? [],
-			)
+			const key = original
+				.map(badge => (isRecord(badge) ? String(badge.id) : ''))
+				.join()
+			const cacheKey = `${userId}|${key}`
+			const known = results.get(cacheKey)
+			if (known) return known
+			const badges = build(original, userId)
+			results.set(cacheKey, badges)
+			return badges
 		},
 	}
 }

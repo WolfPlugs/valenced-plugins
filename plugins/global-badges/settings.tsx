@@ -58,6 +58,16 @@ export default function SettingsComponent({
 					<TableRadioRow value="prefix" label="Show before badge name" />
 					<TableRadioRow value="suffix" label="Show after badge name" />
 				</TableRadioGroup>
+				<TableRowGroup>
+					<TableSwitchRow
+						label="Animate badges"
+						subLabel="Turn off to show still images on profiles, which keeps profiles with many animated badges smooth. The badges screen still animates."
+						value={settings.animation !== 'none'}
+						onValueChange={animate =>
+							storage.set({ animation: animate ? 'all' : 'none' })
+						}
+					/>
+				</TableRowGroup>
 				<TableRowGroup title="Badge providers">
 					{Object.entries(Providers).map(([provider, label]) => (
 						<TableSwitchRow
