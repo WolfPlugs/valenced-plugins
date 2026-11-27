@@ -5,10 +5,11 @@
 	"description": "Show profile badges from other Discord clients and BadgeVault.",
 	"author": "Wolfie <347096063569559553> (https://wolfies.org/ \"Website\") (https://github.com/Wolfkid200444 \"GitHub\")",
 	"contributors": [
-		"Palm <629368283354628116> (https://github.com/sponsors/PalmDevs \"Donations\") (https://palmdevs.me \"Website\") (https://github.com/PalmDevs \"GitHub\")"
+		"Palm <629368283354628116> (https://github.com/sponsors/PalmDevs \"Donations\") (https://palmdevs.me \"Website\") (https://github.com/PalmDevs \"GitHub\")",
+		"dxckie <772390964471791630> (https://github.com/dxckie-cell \"GitHub\")"
 	],
 	"icon": "AwardIcon",
-	"version": "1.0.0",
+	"version": "1.2.0",
 	"dependencies": {
 		"valenced.api": {
 			"version": ">=1 <2"

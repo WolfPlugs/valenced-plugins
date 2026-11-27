@@ -17,7 +17,7 @@ import { setupBadgeViewer } from './viewer'
 import type { JsonStorage } from '@valenced/json-storage'
 import type { PluginApi } from '@valenced/plugins/types'
 import type { AnyObject } from '@valenced/utils/types'
-import type { Settings } from './badges'
+import type { Badge, Settings } from './badges'
 
 const RefreshInterval = 30 * 60 * 1000
 
@@ -31,22 +31,20 @@ let timeout: ReturnType<typeof setTimeout> | undefined
 async function fetchBadges(
 	jsonStorage: JsonStorage<Settings>,
 	cacheStorage: JsonStorage<AnyObject>,
-): Promise<AnyObject> {
+): Promise<Map<string, Badge[]>> {
 	const requestController = new AbortController()
 	controller = requestController
 	timeout = setTimeout(() => requestController.abort(), 30_000)
 
 	const storage = await jsonStorage.get()
 	const netInfo = await NetInfo.fetch()
-	let cached: AnyObject | undefined
+	let cached: Map<string, Badge[]> | undefined
 	try {
-		const json = await cacheStorage.get()
-		parseBadges(json)
-		cached = json
+		cached = parseBadges(await cacheStorage.get())
 	} catch {}
 
 	if (netInfo.details?.isConnectionExpensive && !storage.updateOnMetered)
-		return cached ?? { users: {} }
+		return cached ?? new Map()
 	if (cached && Date.now() - (storage.lastFetched ?? 0) < RefreshInterval)
 		return cached
 
@@ -58,10 +56,11 @@ async function fetchBadges(
 	if (!response.ok) throw new Error(`Badge service returned ${response.status}`)
 
 	const json = await response.json()
-	parseBadges(json)
+	// Parsed once, as the list is big and this runs on the same thread as the UI
+	const users = parseBadges(json)
 	await cacheStorage.set(json, true)
 	await jsonStorage.set({ lastFetched: Date.now() })
-	return json
+	return users
 }
 
 async function refresh(
@@ -74,8 +73,7 @@ async function refresh(
 	fetching = true
 
 	try {
-		const json = await fetchBadges(jsonStorage, cacheStorage)
-		const users = parseBadges(json)
+		const users = await fetchBadges(jsonStorage, cacheStorage)
 		if (active) store.setUsers(users)
 	} catch (error) {
 		if (active) plugin.reportError(error)
@@ -112,6 +110,7 @@ export default plugin<{ jsonStorage: Settings }>({
 					value?.showModStyle === 'prefix' || value?.showModStyle === 'suffix'
 						? value.showModStyle
 						: 'none',
+				animation: value?.animation === 'none' ? 'none' : 'all',
 				providers: value?.providers ?? {},
 			})
 		}
